@@ -1,0 +1,284 @@
+@import "tailwindcss";
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Heirloom Scents — design tokens.
+
+   Ported from the `classical` design system of the Claude Design project
+   (0c4ed435-1fea-4231-b2f2-a1c0a0df68bf), plus the brand layer the artboards
+   used raw and never tokenised.
+
+   Everything lives in @theme, never in :root. In Tailwind v4, @theme emits the
+   custom property AND generates the matching utility. Declaring a value in both
+   places would define it twice — the exact duplication this file exists to
+   remove. Only values that must NOT produce a utility go in the :root block
+   at the bottom.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@theme {
+  /* ── Ground and ink ────────────────────────────────────────────────────── */
+  --color-bg: #f3f2f2;
+  --color-surface: #eae9e9;
+  --color-ink: #201f1d;
+  --color-accent: #b68235;
+  --color-accent-2: #ac803e;
+  --color-divider: color-mix(in srgb, #201f1d 16%, transparent);
+
+  /* ── Neutral ramp — OKLCH-derived, shared perceptual lightness scale ──── */
+  --color-neutral-100: #f8f4f4;
+  --color-neutral-200: #eae7e7;
+  --color-neutral-300: #d7d3d3;
+  --color-neutral-400: #bab6b6;
+  --color-neutral-500: #9b9797;
+  --color-neutral-600: #7d7979;
+  --color-neutral-700: #605d5d;
+  --color-neutral-800: #444141;
+  --color-neutral-900: #2d2b2b;
+
+  /* ── Accent ramp ───────────────────────────────────────────────────────── */
+  --color-accent-100: #fff3e4;
+  --color-accent-200: #ffe3bf;
+  --color-accent-300: #facb8d;
+  --color-accent-400: #e1ad66;
+  --color-accent-500: #c28d41;
+  --color-accent-600: #a06f24;
+  --color-accent-700: #7d5411;
+  --color-accent-800: #5a3b0a;
+  --color-accent-900: #3a270d;
+
+  /* ── Accent-2 ramp — mono scheme; reads as accent, kept so both resolve ─ */
+  --color-accent-2-100: #fff3e4;
+  --color-accent-2-200: #ffe3be;
+  --color-accent-2-300: #f5cd96;
+  --color-accent-2-400: #dbaf70;
+  --color-accent-2-500: #bc8f4e;
+  --color-accent-2-600: #9b7232;
+  --color-accent-2-700: #79561f;
+  --color-accent-2-800: #573d14;
+  --color-accent-2-900: #382810;
+
+  /* ── Brand layer — used raw in every artboard, tokenised here ──────────── */
+  --color-burgundy: #400d15;
+  --color-burgundy-deep: #3a0a11;
+  --color-burgundy-lift: #551620;
+  --color-burgundy-dark: #28070c;
+  --color-cream: #f1e8da;
+  --color-error: #7a1f2b;
+
+  /* ── Ink alpha scale — replaces 14 ad-hoc color-mix percentages ────────── */
+  --color-ink-90: color-mix(in srgb, #201f1d 90%, transparent);
+  --color-ink-80: color-mix(in srgb, #201f1d 80%, transparent);
+  --color-ink-70: color-mix(in srgb, #201f1d 70%, transparent);
+  --color-ink-65: color-mix(in srgb, #201f1d 65%, transparent);
+  --color-ink-55: color-mix(in srgb, #201f1d 55%, transparent);
+  --color-ink-45: color-mix(in srgb, #201f1d 45%, transparent);
+  --color-ink-30: color-mix(in srgb, #201f1d 30%, transparent);
+
+  /* ── Cream alpha scale — replaces 14 more on the dark bands ────────────── */
+  --color-cream-90: color-mix(in srgb, #f1e8da 90%, transparent);
+  --color-cream-85: color-mix(in srgb, #f1e8da 85%, transparent);
+  --color-cream-80: color-mix(in srgb, #f1e8da 80%, transparent);
+  --color-cream-60: color-mix(in srgb, #f1e8da 60%, transparent);
+  --color-cream-50: color-mix(in srgb, #f1e8da 50%, transparent);
+  --color-cream-30: color-mix(in srgb, #f1e8da 30%, transparent);
+  --color-cream-15: color-mix(in srgb, #f1e8da 15%, transparent);
+
+  /* ── Type — Cormorant Garamond over Lora, self-hosted via next/font ────── */
+  --font-heading: var(--font-cormorant), Georgia, serif;
+  --font-body: var(--font-lora), Georgia, serif;
+
+  /* ── Type scale — collapses the 29 ad-hoc sizes across the six artboards ─ */
+  --text-display-2xl: 96px;
+  --text-display-xl: 88px;
+  --text-display-lg: 76px;
+  --text-display-md: 72px;
+  --text-display-sm: 64px;
+  --text-display-xs: 52px;
+  --text-title-xl: 48px;
+  --text-title-lg: 44px;
+  --text-title-md: 40px;
+  --text-title-sm: 34px;
+  --text-heading-xl: 32px;
+  --text-heading-lg: 30px;
+  --text-heading-md: 27px;
+  --text-heading-sm: 26px;
+  --text-heading-xs: 22px;
+  --text-subtitle-lg: 19px;
+  --text-subtitle-md: 18px;
+  --text-subtitle-sm: 17px;
+  --text-body-lg: 15px;
+  --text-body-md: 14.5px;
+  --text-body: 14px;
+  --text-body-sm: 13.5px;
+  --text-body-xs: 12.5px;
+  --text-label-lg: 11.5px;
+  --text-label-md: 11px;
+  --text-label-sm: 10.5px;
+  --text-label-xs: 9px;
+
+  /* ── Tracking — the artboards' uppercase label rhythm ──────────────────── */
+  --tracking-wordmark: 0.68em;
+  --tracking-hero: 0.26em;
+  --tracking-widest: 0.3em;
+  --tracking-eyebrow: 0.24em;
+  --tracking-nav: 0.22em;
+  --tracking-button: 0.2em;
+  --tracking-link: 0.18em;
+  --tracking-note: 0.16em;
+  --tracking-meta: 0.14em;
+  --tracking-brand: 0.1em;
+  --tracking-field: 0.06em;
+
+  /* ── Spacing — density 1.15× baked in ─────────────────────────────────── */
+  --spacing-1: 4.6px;
+  --spacing-2: 9.2px;
+  --spacing-3: 13.8px;
+  --spacing-4: 18.4px;
+  --spacing-6: 27.6px;
+  --spacing-8: 36.8px;
+  /* The artboards' full section rhythm at desktop — used by six sections. */
+  --spacing-section: 110px;
+
+  /* ── Radius ────────────────────────────────────────────────────────────── */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 7px;
+
+  /* ── Elevation — a whisper, per the classical guidance ─────────────────── */
+  --shadow-sm: 0 1px 2px color-mix(in srgb, #2d2b2b 14%, transparent);
+  --shadow-md: 0 3px 10px color-mix(in srgb, #2d2b2b 16%, transparent);
+  --shadow-lg: 0 12px 32px color-mix(in srgb, #2d2b2b 22%, transparent);
+
+  /* ── Motion ────────────────────────────────────────────────────────────── */
+  --ease-brand: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-cue: cubic-bezier(0.45, 0, 0.55, 1);
+
+  /* ── Layout ────────────────────────────────────────────────────────────── */
+  --container-content: 1180px;
+  --container-wide: 1280px;
+  --container-prose: 840px;
+  --container-narrow: 680px;
+  /* The constrained measure the artboards give to standfirst copy. */
+  --container-blurb: 400px;
+}
+
+/* Values that must not generate utilities. */
+:root {
+  --nav-h: 79px;
+  --nav-h-mobile: 65px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Base — mirrors the classical stylesheet's element layer.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: var(--nav-h);
+  }
+
+  body {
+    background: var(--color-bg);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    font-size: var(--text-body-lg);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-heading);
+    line-height: 1.12;
+    text-wrap: balance;
+  }
+
+  img {
+    display: block;
+    max-width: 100%;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--color-accent) 30%, transparent);
+  }
+
+  /* Tabular figures wherever digits stand as figures, per the classical guide. */
+  .tnum {
+    font-feature-settings: "tnum";
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Keyframes — ported 1:1 from the artboards.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@keyframes hs-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(26px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes hs-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+@keyframes hs-cue {
+  0% {
+    transform: scaleY(0);
+    transform-origin: top;
+  }
+  45% {
+    transform: scaleY(1);
+    transform-origin: top;
+  }
+  55% {
+    transform: scaleY(1);
+    transform-origin: bottom;
+  }
+  100% {
+    transform: scaleY(0);
+    transform-origin: bottom;
+  }
+}
+@keyframes hs-ken-burns {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.09);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+    /* Delay must be zeroed too. Without it, an element with animation-fill-mode:both
+       sits at its `from` state — opacity 0 — for the whole delay, so reduced-motion
+       users watch content pop in late instead of seeing it immediately. */
+    animation-delay: 0s !important;
+    transition-delay: 0s !important;
+  }
+}

@@ -1,0 +1,12 @@
+.next
+node_modules
+coverage
+playwright-report
+test-results
+design-reference
+public
+package-lock.json
+
+# Upstream boilerplate — Contributor Covenant and GitHub templates.
+# Reformatting them creates diff noise and they are not project code.
+.github/
