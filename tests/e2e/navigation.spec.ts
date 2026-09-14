@@ -57,8 +57,14 @@ test.describe("the shell, at every width", () => {
     ).toBeVisible();
   });
 
+  /*
+   * Starts from /about rather than /events. The wordmark lives in the shared
+   * header, so the page it is clicked from is incidental to what this asserts —
+   * and /events decodes five reels, which on a constrained WebKit CI runner was
+   * enough to make the synthetic tap miss. /about carries no video.
+   */
   test("the wordmark returns home", async ({ page }) => {
-    await page.goto("/events");
+    await page.goto("/about");
     await page.getByRole("link", { name: /Heirloom Scents — home/ }).click();
     await expect(page).toHaveURL(/:\d+\/$/);
   });
