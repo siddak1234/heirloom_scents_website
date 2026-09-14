@@ -1,17 +1,29 @@
 @import "tailwindcss";
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   Heirloom Scents — design tokens.
+   Heirloom Scents — design tokens. The single declaration site.
 
    Ported from the `classical` design system of the Claude Design project
-   (0c4ed435-1fea-4231-b2f2-a1c0a0df68bf), plus the brand layer the artboards
-   used raw and never tokenised.
+   (0c4ed435, `_ds/classical-d888ab7f`), plus the brand layer the artboards use
+   raw and the system never tokenised.
 
-   Everything lives in @theme, never in :root. In Tailwind v4, @theme emits the
-   custom property AND generates the matching utility. Declaring a value in both
-   places would define it twice — the exact duplication this file exists to
-   remove. Only values that must NOT produce a utility go in the :root block
-   at the bottom.
+   Everything lives in @theme, never in :root. In Tailwind v4 @theme emits the
+   custom property AND generates the matching utility, so a value is declared
+   exactly once. Only values that must NOT produce a utility (--nav-h) sit in
+   the :root block at the bottom.
+
+   Every token here is referenced by the site. Two rules keep it that way:
+
+   1. No alpha tokens. Tailwind's `/N` modifier compiles `text-ink/66` to
+      `color-mix(in srgb, #201f1d 66%, transparent)` — byte-identical to what
+      the artboards write inline. Mixing with `transparent` premultiplies, so
+      the srgb and oklab paths agree. The artboards spend 13 ink alphas, 11
+      cream and 3 accent; none of them needs a token.
+
+   2. No spacing scale. The artboards set spacing in raw pixels and reference
+      --space-* nowhere, so Tailwind's default 4px-based scale applies. It
+      lands exactly on the design's own rhythm — p-14 is 56px, gap-18 is 72px,
+      pt-25 is 100px — and the handful of odd values are written as arbitraries.
    ═══════════════════════════════════════════════════════════════════════════ */
 
 @theme {
@@ -20,128 +32,85 @@
   --color-surface: #eae9e9;
   --color-ink: #201f1d;
   --color-accent: #b68235;
-  --color-accent-2: #ac803e;
   --color-divider: color-mix(in srgb, #201f1d 16%, transparent);
 
-  /* ── Neutral ramp — OKLCH-derived, shared perceptual lightness scale ──── */
-  --color-neutral-100: #f8f4f4;
-  --color-neutral-200: #eae7e7;
-  --color-neutral-300: #d7d3d3;
-  --color-neutral-400: #bab6b6;
-  --color-neutral-500: #9b9797;
-  --color-neutral-600: #7d7979;
-  --color-neutral-700: #605d5d;
-  --color-neutral-800: #444141;
-  --color-neutral-900: #2d2b2b;
-
-  /* ── Accent ramp ───────────────────────────────────────────────────────── */
-  --color-accent-100: #fff3e4;
-  --color-accent-200: #ffe3bf;
-  --color-accent-300: #facb8d;
-  --color-accent-400: #e1ad66;
-  --color-accent-500: #c28d41;
+  /* Three accent ramp steps, and only three. The bright accent measures 3.02:1
+     on the light ground — fine for rules, icons and display type, short of the
+     4.5:1 that label-size text needs. The classical readme prescribes the
+     substitution: "for paragraph-size text in the accent use a deep ramp step
+     (--color-accent-700 on this ground) rather than the accent itself." */
   --color-accent-600: #a06f24;
   --color-accent-700: #7d5411;
   --color-accent-800: #5a3b0a;
-  --color-accent-900: #3a270d;
 
-  /* ── Accent-2 ramp — mono scheme; reads as accent, kept so both resolve ─ */
-  --color-accent-2-100: #fff3e4;
-  --color-accent-2-200: #ffe3be;
-  --color-accent-2-300: #f5cd96;
-  --color-accent-2-400: #dbaf70;
-  --color-accent-2-500: #bc8f4e;
-  --color-accent-2-600: #9b7232;
-  --color-accent-2-700: #79561f;
-  --color-accent-2-800: #573d14;
-  --color-accent-2-900: #382810;
-
-  /* ── Brand layer — used raw in every artboard, tokenised here ──────────── */
-  --color-burgundy: #400d15;
-  --color-burgundy-deep: #3a0a11;
-  --color-burgundy-lift: #551620;
-  --color-burgundy-dark: #28070c;
+  /* ── Brand layer ───────────────────────────────────────────────────────────
+     The redesign retires burgundy outright: #400d15 and its three siblings
+     appear zero times across the six artboards. Every dark ground is `night`,
+     and the overlay veils are the three darker bases the gradients fade to. */
+  --color-night: #1b1611;
   --color-cream: #f1e8da;
-  --color-error: #7a1f2b;
-
-  /* ── Ink alpha scale — replaces 14 ad-hoc color-mix percentages ────────── */
-  --color-ink-90: color-mix(in srgb, #201f1d 90%, transparent);
-  --color-ink-80: color-mix(in srgb, #201f1d 80%, transparent);
-  --color-ink-70: color-mix(in srgb, #201f1d 70%, transparent);
-  --color-ink-65: color-mix(in srgb, #201f1d 65%, transparent);
-  --color-ink-55: color-mix(in srgb, #201f1d 55%, transparent);
-  --color-ink-45: color-mix(in srgb, #201f1d 45%, transparent);
-  --color-ink-30: color-mix(in srgb, #201f1d 30%, transparent);
-
-  /* ── Cream alpha scale — replaces 14 more on the dark bands ────────────── */
-  --color-cream-90: color-mix(in srgb, #f1e8da 90%, transparent);
-  --color-cream-85: color-mix(in srgb, #f1e8da 85%, transparent);
-  --color-cream-80: color-mix(in srgb, #f1e8da 80%, transparent);
-  --color-cream-60: color-mix(in srgb, #f1e8da 60%, transparent);
-  --color-cream-50: color-mix(in srgb, #f1e8da 50%, transparent);
-  --color-cream-30: color-mix(in srgb, #f1e8da 30%, transparent);
-  --color-cream-15: color-mix(in srgb, #f1e8da 15%, transparent);
+  --color-veil: #16120e;
+  --color-veil-deep: #120e0b;
+  --color-veil-lift: #4a3c2a;
 
   /* ── Type — Cormorant Garamond over Lora, self-hosted via next/font ────── */
   --font-heading: var(--font-cormorant), Georgia, serif;
   --font-body: var(--font-lora), Georgia, serif;
 
-  /* ── Type scale — collapses the 29 ad-hoc sizes across the six artboards ─ */
+  /* ── Type scale ────────────────────────────────────────────────────────────
+     The classical system is explicit that this is "a fixed scale; density
+     moves spacing, not sizes". These are the sizes the six artboards actually
+     set — every one is used, and nothing is here for symmetry. */
+  --text-numeral: 190px;
   --text-display-2xl: 96px;
-  --text-display-xl: 88px;
-  --text-display-lg: 76px;
-  --text-display-md: 72px;
-  --text-display-sm: 64px;
-  --text-display-xs: 52px;
-  --text-title-xl: 48px;
-  --text-title-lg: 44px;
+  --text-display-xl: 72px;
+  --text-display-lg: 64px;
+  --text-display-md: 52px;
+  --text-display-sm: 48px;
+  --text-display-xs: 46px;
+  --text-title-xl: 44px;
+  --text-title-lg: 42px;
   --text-title-md: 40px;
-  --text-title-sm: 34px;
-  --text-heading-xl: 32px;
-  --text-heading-lg: 30px;
-  --text-heading-md: 27px;
-  --text-heading-sm: 26px;
+  --text-title-sm: 38px;
+  --text-heading-xl: 34px;
+  --text-heading-lg: 32px;
+  --text-heading-md: 30px;
+  --text-heading-sm: 27px;
   --text-heading-xs: 22px;
+  --text-subtitle-xl: 20px;
   --text-subtitle-lg: 19px;
   --text-subtitle-md: 18px;
   --text-subtitle-sm: 17px;
+  --text-subtitle-xs: 16px;
   --text-body-lg: 15px;
   --text-body-md: 14.5px;
   --text-body: 14px;
   --text-body-sm: 13.5px;
-  --text-body-xs: 12.5px;
-  --text-label-lg: 11.5px;
-  --text-label-md: 11px;
-  --text-label-sm: 10.5px;
-  --text-label-xs: 9px;
+  --text-body-xs: 13px;
+  --text-caption: 12.5px;
+  --text-caption-sm: 12px;
+  --text-label-xl: 11.5px;
+  --text-label-lg: 11px;
+  --text-label-md: 10.5px;
+  --text-label-sm: 10px;
+  --text-label-xs: 9.5px;
+  --text-label-2xs: 9px;
 
-  /* ── Tracking — the artboards' uppercase label rhythm ──────────────────── */
-  --tracking-wordmark: 0.68em;
-  --tracking-hero: 0.26em;
+  /* ── Tracking — the artboards' uppercase label rhythm, all eleven steps ── */
   --tracking-widest: 0.3em;
+  --tracking-hero: 0.26em;
   --tracking-eyebrow: 0.24em;
   --tracking-nav: 0.22em;
   --tracking-button: 0.2em;
   --tracking-link: 0.18em;
   --tracking-note: 0.16em;
   --tracking-meta: 0.14em;
+  --tracking-tight-meta: 0.12em;
   --tracking-brand: 0.1em;
   --tracking-field: 0.06em;
 
-  /* ── Spacing — density 1.15× baked in ─────────────────────────────────── */
-  --spacing-1: 4.6px;
-  --spacing-2: 9.2px;
-  --spacing-3: 13.8px;
-  --spacing-4: 18.4px;
-  --spacing-6: 27.6px;
-  --spacing-8: 36.8px;
-  /* The artboards' full section rhythm at desktop — used by six sections. */
-  --spacing-section: 110px;
-
-  /* ── Radius ────────────────────────────────────────────────────────────── */
-  --radius-sm: 2px;
+  /* ── Radius — only the 4px step is used; circles are rounded-full ──────── */
   --radius-md: 4px;
-  --radius-lg: 7px;
 
   /* ── Elevation — a whisper, per the classical guidance ─────────────────── */
   --shadow-sm: 0 1px 2px color-mix(in srgb, #2d2b2b 14%, transparent);
@@ -152,19 +121,18 @@
   --ease-brand: cubic-bezier(0.22, 0.61, 0.36, 1);
   --ease-cue: cubic-bezier(0.45, 0, 0.55, 1);
 
-  /* ── Layout ────────────────────────────────────────────────────────────── */
+  /* ── Layout — the four measures the artboards reuse ────────────────────── */
   --container-content: 1180px;
   --container-wide: 1280px;
   --container-prose: 840px;
   --container-narrow: 680px;
-  /* The constrained measure the artboards give to standfirst copy. */
-  --container-blurb: 400px;
 }
 
-/* Values that must not generate utilities. */
+/* Values that must not generate utilities. 79px is the design's own constant:
+   the scent deck sizes every slide at calc(100vh - 79px) and offsets its
+   scroll by the same figure, so the two must agree. */
 :root {
   --nav-h: 79px;
-  --nav-h-mobile: 65px;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -186,6 +154,10 @@
     -webkit-font-smoothing: antialiased;
   }
 
+  /* The system's heading defaults, including the -0.015em it sets and the
+     semibold ceiling it describes. Display headings in the artboards opt down
+     to the normal cut per instance; none of them restates the tracking, so it
+     has to live here to be inherited. */
   h1,
   h2,
   h3,
@@ -193,13 +165,29 @@
   h5,
   h6 {
     font-family: var(--font-heading);
+    font-weight: 600;
     line-height: 1.12;
+    letter-spacing: -0.015em;
     text-wrap: balance;
+  }
+
+  /* Every artboard overrides the system's bare `a` colour with this pair. */
+  a {
+    color: var(--color-accent-700);
+    text-underline-offset: 3px;
+  }
+
+  a:hover {
+    color: var(--color-accent-600);
   }
 
   img {
     display: block;
     max-width: 100%;
+  }
+
+  figure {
+    margin: 0;
   }
 
   :focus-visible {
@@ -219,7 +207,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   Keyframes — ported 1:1 from the artboards.
+   Keyframes — ported 1:1 from the artboards' own @keyframes blocks.
    ═══════════════════════════════════════════════════════════════════════════ */
 
 @keyframes hs-fade-up {
@@ -232,6 +220,7 @@
     transform: none;
   }
 }
+
 @keyframes hs-marquee {
   from {
     transform: translateX(0);
@@ -240,6 +229,7 @@
     transform: translateX(-50%);
   }
 }
+
 @keyframes hs-cue {
   0% {
     transform: scaleY(0);
@@ -258,12 +248,13 @@
     transform-origin: bottom;
   }
 }
+
 @keyframes hs-ken-burns {
   from {
     transform: scale(1);
   }
   to {
-    transform: scale(1.09);
+    transform: scale(1.08);
   }
 }
 
@@ -275,10 +266,16 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
-    /* Delay must be zeroed too. Without it, an element with animation-fill-mode:both
-       sits at its `from` state — opacity 0 — for the whole delay, so reduced-motion
-       users watch content pop in late instead of seeing it immediately. */
+    /* Delay must be zeroed too. Without it, an element with
+       animation-fill-mode:both sits at its `from` state — opacity 0 — for the
+       whole delay, so reduced-motion users watch content pop in late instead
+       of seeing it immediately. */
     animation-delay: 0s !important;
     transition-delay: 0s !important;
+  }
+
+  /* The scent deck's mandatory snap fights an instant scroll; drop it. */
+  html {
+    scroll-snap-type: none !important;
   }
 }

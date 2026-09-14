@@ -1,14 +1,12 @@
 /**
- * The handful of brand values that JavaScript APIs need as literals — the
- * viewport themeColor and OG image rendering cannot read a CSS custom property.
+ * The JS-side mirror of the token layer in globals.css, for the one place a
+ * JavaScript API needs a literal: `viewport.themeColor` cannot read a CSS
+ * custom property.
  *
- * This file is the single JS-side mirror of the token layer in globals.css.
- * Keep the two in step; nothing else in src/ may hold a raw colour.
+ * Only values with a live consumer belong here. Nothing else in src/ may hold
+ * a raw colour — `npm run audit:tokens` fails the build if it does.
  */
 export const BRAND_HEX = {
+  /** --color-bg. The page ground, and so the browser chrome colour. */
   bg: "#f3f2f2",
-  ink: "#201f1d",
-  accent: "#b68235",
-  burgundy: "#400d15",
-  cream: "#f1e8da",
 } as const;

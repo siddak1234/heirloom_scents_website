@@ -1,14 +1,23 @@
 /**
- * Reports imagery still standing in for the real thing, and any image on disk
- * that no content module references.
+ * Every asset on disk is referenced, and every referenced asset is on disk.
+ *
+ * Fails the build on either direction, so a redesign cannot strand a file in
+ * public/ and a component cannot point at a key that no longer exists.
  */
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
-const manifest = readFileSync("src/content/image-manifest.ts", "utf8");
-const keys = [...manifest.matchAll(/^\s{2}"([^"]+)":/gm)].map((m) => m[1]);
+const manifest = readFileSync("src/content/media-manifest.ts", "utf8");
 
-// Every src/ file that could reference an image key.
+/** Keys are the only two-space-indented quoted properties in the generated file. */
+function keysIn(block) {
+  const section = manifest.split(`export const ${block} = {`)[1]?.split("} as const")[0] ?? "";
+  return [...section.matchAll(/^\s{2}"([^"]+)":/gm)].map((m) => m[1]);
+}
+
+const imageKeys = keysIn("IMAGES");
+const videoKeys = keysIn("VIDEOS");
+
 function walk(dir) {
   const out = [];
   for (const e of readdirSync(dir, { withFileTypes: true })) {
@@ -18,34 +27,30 @@ function walk(dir) {
   }
   return out;
 }
+
 const sources = walk("src")
-  .filter((f) => !f.endsWith("image-manifest.ts"))
+  .filter((f) => !f.endsWith("media-manifest.ts"))
   .map((f) => readFileSync(f, "utf8"))
   .join("\n");
 
-const unreferenced = keys.filter((k) => !sources.includes(`"${k}"`));
+const problems = [];
 
-let placeholders = [];
-try {
-  const report = JSON.parse(readFileSync("design-reference/asset-report.json", "utf8"));
-  placeholders = report.filter((r) => r.status === "TRUNCATED").map((r) => r.name);
-} catch {
-  /* extraction report not present */
+// 1. Nothing on disk is stranded.
+for (const key of [...imageKeys, ...videoKeys]) {
+  if (!sources.includes(`"${key}"`)) problems.push(`stranded — nothing references "${key}"`);
 }
 
-console.log(`images in manifest: ${String(keys.length)}`);
-if (unreferenced.length) {
-  console.log(`\n⚠ ${String(unreferenced.length)} image(s) on disk that nothing references:`);
-  for (const k of unreferenced) console.log(`    ${k}`);
+// 2. Every file the manifest names exists, posters included.
+for (const m of manifest.matchAll(/(?:src|poster): "(\/[^"]+)"/g)) {
+  if (!existsSync(join("public", m[1]))) problems.push(`missing on disk — public${m[1]}`);
 }
-if (placeholders.length) {
-  console.log(
-    `\n⚠ ${String(placeholders.length)} placeholder image(s) awaiting the real photograph:`,
-  );
-  for (const p of placeholders) console.log(`    public/images/**/${p}`);
-  console.log(
-    "\n  Replace each file in place at the same dimensions, then run: npm run extract:design",
-  );
+
+console.log(`assets: ${String(imageKeys.length)} images, ${String(videoKeys.length)} videos`);
+
+if (problems.length) {
+  console.error(`\n✗ ${String(problems.length)} asset problem(s):\n`);
+  for (const p of problems) console.error(`  ${p}`);
+  console.error("\nDelete the file, or reference it. Then: npm run media:manifest");
+  process.exit(1);
 }
-if (!unreferenced.length && !placeholders.length)
-  console.log("✓ assets: all real and all referenced");
+console.log("✓ assets: all referenced, all present");

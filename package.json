@@ -21,10 +21,9 @@
     "audit:bundle": "node scripts/audit-bundle.mjs",
     "audit:assets": "node scripts/audit-assets.mjs",
     "knip": "knip",
-    "verify": "npm run typecheck && npm run lint && npm run format:check && npm run test && npm run audit:tokens && npm run audit:reuse && npm run knip && npm run build && npm run audit:bundle",
-    "images:manifest": "node scripts/build-image-manifest.mjs",
-    "images:placeholders": "node scripts/generate-placeholders.mjs",
-    "preview": "node scripts/preview.mjs"
+    "verify": "npm run typecheck && npm run lint && npm run format:check && npm run test && npm run audit:tokens && npm run audit:reuse && npm run audit:assets && npm run knip && npm run build && npm run audit:bundle",
+    "preview": "node scripts/preview.mjs",
+    "media:manifest": "node scripts/build-media-manifest.mjs"
   },
   "dependencies": {
     "@daypicker/react": "^10.0.1",
