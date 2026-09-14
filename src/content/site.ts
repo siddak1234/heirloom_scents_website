@@ -8,7 +8,6 @@ const siteSchema = z.object({
   locality: z.string(),
   region: z.string(),
   serviceArea: z.string(),
-  email: z.email(),
   hostEmail: z.email(),
   instagram: z.string(),
   copyrightYear: z.number().int(),
@@ -17,9 +16,15 @@ const siteSchema = z.object({
 });
 
 /*
- * `email` and `hostEmail` are stubbed in the source artboards, which label the
- * contact block "Email & phone stubs, to confirm". They render as real content;
- * replacing them is a one-line edit here.
+ * There is deliberately no public contact address. The artboards showed
+ * `hello@heirloomscents.com` under a note reading "Email & phone stubs, to
+ * confirm"; that mailbox does not exist, so it is not displayed anywhere.
+ * Instagram and the booking form are the two contact routes that work.
+ *
+ * `hostEmail` is internal only and is never shown to a visitor. It fills the
+ * organizer field the .ics format requires, and `BOOKING_HOST_EMAIL` overrides
+ * it once transactional email is wired — see docs/DEPLOYMENT.md. No invite is
+ * delivered today.
  *
  * `announcement.notice` names a season and a year. It is the one string on the
  * site that goes stale on a calendar — it lives here so it can be changed in
@@ -33,7 +38,6 @@ export const SITE = siteSchema.parse({
   locality: "Dallas",
   region: "Texas",
   serviceArea: "Dallas–Fort Worth",
-  email: "hello@heirloomscents.com",
   hostEmail: "host@heirloomscents.com",
   instagram: "@heirloomscents",
   copyrightYear: 2026,

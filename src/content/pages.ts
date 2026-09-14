@@ -144,15 +144,28 @@ export const ABOUT_COPY = {
     "I wanted guests to leave holding something they made, not something they were handed.",
   /** Stubbed in the artboard. See docs/REVAMP-PLAN.md §9. */
   founderAttribution: "Founder name & bio to come",
+  /*
+   * The artboard's middle column was "Write to us / hello@heirloomscents.com",
+   * under its own note reading "Email & phone stubs, to confirm". That mailbox
+   * does not exist, so the column carries the contact route that does — the
+   * booking form. The shape the artboard draws is kept; only the dead address
+   * is replaced.
+   */
   contactColumns: [
     { label: "Find us", value: "Dallas, Texas", note: "Serving Dallas–Fort Worth & beyond" },
     {
-      label: "Write to us",
-      value: "hello@heirloomscents.com",
-      note: "Email & phone stubs, to confirm",
+      label: "Talk to us",
+      value: "Book a consultation",
+      note: "Thirty minutes, video or phone",
+      href: "/booking",
     },
     { label: "Follow along", value: "@heirloomscents", note: "Recent celebrations, weekly" },
-  ],
+  ] as readonly {
+    readonly label: string;
+    readonly value: string;
+    readonly note: string;
+    readonly href?: string;
+  }[],
 } as const;
 
 /* ── /scents ─────────────────────────────────────────────────────────────── */
@@ -176,7 +189,6 @@ export const BOOKING_COPY = {
   asideHeading: ["One conversation.", "Then the cart is yours."],
   asideBlurb: "Thirty minutes, video or phone. The details can wait for the call.",
   asideSteps: ["Invite sent instantly", "We plan it on the call", "Proposal within two days"],
-  asideEmailLead: "Prefer email?",
   formHeading: "Reserve your consultation.",
   submitLabel: "Reserve",
   disclaimer:

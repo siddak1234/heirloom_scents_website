@@ -606,21 +606,45 @@ rather than adding a second linter.
 
 ---
 
-## 9. Open — content, not construction
+## 9. Content decisions
 
-Everything needed to build is confirmed. These need a decision from the business,
-and none blocks a phase:
+Everything needed to build was confirmed from the artboards. These six items
+were content, not construction. Four are now settled.
 
-1. **Founder photo.** The artboard's slot is empty and no asset exists. Ships as
-   an empty plate, or a photo is supplied.
-2. **Founder name and bio.** The artboard says _"Founder name & bio to come"_.
-3. **Contact details.** _"Email & phone stubs, to confirm"_ — is
-   `hello@heirloomscents.com` live, and is there a phone number?
-4. **Newsletter.** The artboard has an input and a Subscribe button and no
-   backend. Options: wire a provider, post to the existing notifier seam, or ship
-   the field disabled. Shipping a form that silently discards an address is not
-   an option.
-5. **`reel-4.mp4` shows two identifiable guests** and plays on the `/events`
-   hero. Consent should be on record before it goes to a public site.
-6. **Announcement copy** hard-codes "fall and winter 2026". It belongs in
-   `src/content/` with an owner, or it goes stale.
+### Settled
+
+1. **`reel-4.mp4` shows two identifiable guests.** Cleared — the same reel is
+   already public on the studio's Instagram, so the `/events` hero keeps it.
+2. **Contact details.** There is **no** `hello@heirloomscents.com` and no phone
+   number. The address the artboards showed — under their own note reading
+   "Email & phone stubs, to confirm" — does not exist, so it is displayed
+   nowhere: not in the footer, not on `/about`, not in the booking aside, and
+   not in the `LocalBusiness` structured data. Instagram and the booking form
+   are the two routes that work, and the artboard's third contact column now
+   carries the booking form instead of a dead mailbox.
+   `tests/e2e/interactions.spec.ts` fails on any `mailto:` link or any
+   `@heirloomscents.com` address appearing on any route, so it cannot creep
+   back.
+3. **Founder photo, name and bio.** Deferred by the business. The block ships
+   as the artboard draws it: a labelled empty mat reading "Founder portrait to
+   come", and the attribution the artboard itself carries. Replacing both is a
+   one-file edit in `src/content/pages.ts` plus one asset.
+4. **Announcement copy.** Lives in `src/content/site.ts` as
+   `announcement.notice`, so the seasonal line has one home. It still needs an
+   owner who updates it — it is the one string on the site that goes stale on a
+   calendar.
+
+### Still open
+
+5. **Newsletter.** The artboard has an input and a Subscribe button and no
+   backend. Today the form validates the address and then says plainly that the
+   list is not open yet — it never accepts and discards one. To finish it:
+   wire a provider, post to the existing notifier seam, or drop the band.
+6. **The booking confirmation overstates what happens.** The screen says "Two
+   calendar invites have just been sent". Nothing is sent: `getNotifier()`
+   returns `ConsoleNotifier` until `RESEND_API_KEY` is set, so the invite is
+   logged to the server and the guest receives nothing. The form, the trading
+   rules, the validation and the `.ics` generation are all real — only delivery
+   is missing. Either wire Resend before launch (see `docs/DEPLOYMENT.md`) or
+   soften the copy to what actually occurs. This is a promise made to a
+   customer, so it is the business's call rather than a code cleanup.

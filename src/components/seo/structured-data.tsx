@@ -17,7 +17,6 @@ export function StructuredData() {
         name: SITE.name,
         description: SITE.description,
         url: SITE.url,
-        email: SITE.email,
         slogan: SITE.tagline,
         address: {
           "@type": "PostalAddress",

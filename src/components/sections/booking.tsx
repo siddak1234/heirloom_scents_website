@@ -9,7 +9,6 @@ import { Confirmation } from "@/features/booking/components/confirmation";
 import type { BookingResult } from "@/features/booking/schema";
 import { image } from "@/content/media-manifest";
 import { BOOKING_COPY } from "@/content/pages";
-import { SITE } from "@/content/site";
 
 export function BookingScreen() {
   const [result, setResult] = useState<BookingResult | null>(null);
@@ -71,12 +70,6 @@ export function BookingScreen() {
                 </li>
               ))}
             </ol>
-            <p className="mt-5 text-caption-sm text-cream/60">
-              {BOOKING_COPY.asideEmailLead}{" "}
-              <a href={`mailto:${SITE.email}`} className="text-accent hover:text-accent">
-                {SITE.email}
-              </a>
-            </p>
           </div>
         </DarkBand>
 

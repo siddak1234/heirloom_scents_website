@@ -68,9 +68,6 @@ export function SiteFooterFull() {
             Contact
           </h2>
           <address className="mt-4 flex flex-col gap-2.5 text-caption text-ink/74 not-italic">
-            <a href={`mailto:${SITE.email}`} className="text-ink/74">
-              {SITE.email}
-            </a>
             <span>{SITE.instagram}</span>
             <span>
               {SITE.locality}, {SITE.region}

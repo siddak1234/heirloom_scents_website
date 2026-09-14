@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { DarkBand, Section, SiteFooterSplit } from "@/components/layout";
 import { Reveal } from "@/components/motion";
 import { Eyebrow, Mark, Plate, PlateFrame, Rule } from "@/components/primitives";
@@ -73,7 +74,15 @@ export default function AboutPage() {
                 <Eyebrow as="div" size="md" tone="on-dark">
                   {column.label}
                 </Eyebrow>
-                <p className="mt-3 font-heading text-heading-xs text-cream">{column.value}</p>
+                {column.href ? (
+                  <p className="mt-3 font-heading text-heading-xs">
+                    <Link href={column.href} className="text-cream underline hover:text-accent">
+                      {column.value}
+                    </Link>
+                  </p>
+                ) : (
+                  <p className="mt-3 font-heading text-heading-xs text-cream">{column.value}</p>
+                )}
                 <p className="mt-1.5 text-caption text-cream/62">{column.note}</p>
               </li>
             ))}

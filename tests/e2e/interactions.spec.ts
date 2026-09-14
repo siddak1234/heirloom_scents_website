@@ -346,11 +346,36 @@ test.describe("events", () => {
 });
 
 test.describe("about", () => {
-  test("the contact block exposes a working address", async ({ page }) => {
+  test("the contact block offers only routes that work", async ({ page }) => {
     await settle(page);
     await page.goto("/about");
-    await expect(page.getByText("hello@heirloomscents.com").first()).toBeVisible();
+    const contact = page.locator("section", { hasText: "Follow along" }).last();
+    await expect(contact.getByText("Dallas, Texas").first()).toBeVisible();
+    await expect(contact.getByText("@heirloomscents")).toBeVisible();
+    await expect(contact.getByRole("link", { name: "Book a consultation" })).toHaveAttribute(
+      "href",
+      "/booking",
+    );
   });
+});
+
+/*
+ * There is no public mailbox. This guards the whole site against one creeping
+ * back in — a `mailto:` link that bounces is worse than no link at all.
+ */
+test.describe("contact surface", () => {
+  const ROUTES = ["/", "/scents", "/experience", "/events", "/about", "/booking"] as const;
+
+  for (const route of ROUTES) {
+    test(`${route} offers no mailto link and names no @heirloomscents.com address`, async ({
+      page,
+    }) => {
+      await settle(page);
+      await page.goto(route);
+      await expect(page.locator('a[href^="mailto:"]')).toHaveCount(0);
+      await expect(page.getByText(/@heirloomscents\.com/)).toHaveCount(0);
+    });
+  }
 });
 
 test.describe("not found", () => {

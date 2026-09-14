@@ -19,7 +19,7 @@ export function Confirmation({
       value: (
         <span className="flex flex-col gap-1">
           <span>{result.email}</span>
-          <span>{`${SITE.hostEmail} — your Heirloom host`}</span>
+          <span>Your Heirloom host</span>
         </span>
       ),
     },
