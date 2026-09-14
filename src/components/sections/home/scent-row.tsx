@@ -11,9 +11,7 @@ export function HomeScentRow() {
   return (
     <Section className="pt-25 pb-22.5">
       <Reveal className="mb-13 text-center">
-        <Eyebrow tone="on-dark" className="text-accent-700">
-          {HOME_COPY.scentsEyebrow}
-        </Eyebrow>
+        <Eyebrow>{HOME_COPY.scentsEyebrow}</Eyebrow>
         <h2 className="mt-3 font-heading text-display-md font-normal">{HOME_COPY.scentsHeading}</h2>
       </Reveal>
 

@@ -124,7 +124,7 @@ test.describe("booking — calendar", () => {
 
   test("times stay disabled until a day is chosen", async ({ page }) => {
     await gotoBookingReady(page);
-    await expect(page.getByText("Time — pick a day first")).toBeVisible();
+    await expect(page.getByText("Time · pick a day first")).toBeVisible();
     for (const slot of ["10:00 AM", "12:30 PM", "3:00 PM", "5:30 PM"]) {
       await expect(page.getByRole("button", { name: slot, exact: true })).toBeDisabled();
     }
@@ -139,7 +139,7 @@ test.describe("booking — calendar", () => {
       month: "short",
       day: "numeric",
     });
-    await expect(page.getByText(`Time — ${expected}`)).toBeVisible();
+    await expect(page.getByText(`Time · ${expected}`)).toBeVisible();
     await expect(page.getByRole("button", { name: "3:00 PM", exact: true })).toBeEnabled();
   });
 

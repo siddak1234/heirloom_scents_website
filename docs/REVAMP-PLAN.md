@@ -6,6 +6,20 @@ The site on `main` was ported from this project on **2026-08-20**. The project h
 since been redesigned end to end. This document is the implementation contract
 for re-porting it: what changes, what does not, what enforces the difference.
 
+> **Status: phases A–G executed.** What actually shipped is recorded in
+> `docs/DESIGN-PARITY.md` (every deviation, with measured contrast) and
+> `docs/ARCHITECTURE.md` (the layers as built). Three things were settled
+> differently from the plan below, each for a reason found during the port:
+>
+> - `rgba(27,22,17)` **is** `#1b1611`, so there is no separate warm veil token —
+>   four dark tokens, not five.
+> - The ink and cream alpha scales were not extended; they were **deleted**.
+>   Tailwind's `/N` modifier emits the artboards' own `color-mix` value, so no
+>   alpha needs a token. The `--space-*` scale went the same way.
+> - `tailwind-merge` had to be taught the custom font-size scale. Without it,
+>   every button variant silently lost its label colour. See
+>   `docs/ARCHITECTURE.md`.
+
 **Source of truth.** `~/Desktop/Business Docs/Heirloom Scents/Heirloom Scents website redesign/`
 — six artboards, the `classical` design system, and the full asset set. Read
 2026-09-14. Every value in this document was read out of those files; nothing is

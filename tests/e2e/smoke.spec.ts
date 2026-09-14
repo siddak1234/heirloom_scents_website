@@ -38,11 +38,13 @@ test("every internal link resolves", async ({ page, request }) => {
   }
 });
 
-test("scent anchors from the home page land on the right slides", async ({ page }) => {
+// The artboard puts an id on two of the eight slides. Nothing in the site links
+// to them any more, but they are stable deep-link targets and are kept.
+test("the two scent anchors the artboard names still land", async ({ page }) => {
   await page.goto("/scents#florals");
-  await expect(page.locator("#florals")).toHaveAttribute("aria-label", "Citrus Rose");
+  await expect(page.locator("#florals")).toContainText("Citrus Rose");
   await page.goto("/scents#golds");
-  await expect(page.locator("#golds")).toHaveAttribute("aria-label", "Saffron Amber");
+  await expect(page.locator("#golds")).toContainText("Saffron Amber");
 });
 
 // Safari does not move Tab focus to links unless full keyboard access is on, and

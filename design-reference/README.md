@@ -3,13 +3,16 @@
 Provenance for the Claude Design import.
 
 - **Project** `0c4ed435-1fea-4231-b2f2-a1c0a0df68bf` — "Heirloom Scents website redesign"
-- **Design system** `classical`
-- **Imported** 2026-08-20
+- **Design system** `classical` (`_ds/classical-d888ab7f`). The project also
+  ships `modernist` and `nocturne`; no artboard references either, so neither is
+  ported.
+- **First imported** 2026-08-20
+- **Re-imported after the redesign** 2026-09-14
 
-`asset-report.json` records every asset pulled from the project: its real pixel
-dimensions, and whether the bytes arrived intact or were truncated by the design
-MCP's 256 KiB response cap. `scripts/generate-placeholders.mjs` and
-`npm run audit:assets` both read it.
+The project is on disk at `~/Desktop/Business Docs/Heirloom Scents/Heirloom
+Scents website redesign/` — six `.dc.html` artboards, the three design-system
+bundles, and the full asset set. That is the source of truth, and it is what
+`docs/REVAMP-PLAN.md` and `docs/DESIGN-PARITY.md` were written from.
 
 ## Why the artboards are not copied here
 

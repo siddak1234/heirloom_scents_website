@@ -2,9 +2,10 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/cn";
 
 /**
- * The circular glyph button. Twelve instances across the artboards: the hero's
- * slide arrows, the scent rail's pager, the testimonial pager, the film
- * lightbox's navigation and close, and the booking calendar's month arrows.
+ * The circular glyph button. Nine instances: the hero's two slide arrows, the
+ * scent rail's pager, the testimonial pager, and the film lightbox's previous,
+ * next and close. The booking calendar's month arrows are the same treatment
+ * but belong to DayPicker, so they carry it through `classNames` instead.
  *
  * The glyph is a text arrow (←, →, ✕), exactly as the artboards set it — they
  * use no icon font and no icon library.

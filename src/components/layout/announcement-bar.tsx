@@ -12,7 +12,7 @@ export function AnnouncementBar() {
     <div className="bg-night px-6 py-2.5 text-center text-label-md tracking-link text-cream uppercase">
       {notice} <span aria-hidden="true">·</span> {SITE.locality}, {SITE.region}{" "}
       <span aria-hidden="true">·</span>{" "}
-      <Link href={BOOKING.href} className="text-accent hover:text-accent">
+      <Link href={BOOKING.href} className="text-accent underline hover:text-accent">
         {cta}
       </Link>
     </div>

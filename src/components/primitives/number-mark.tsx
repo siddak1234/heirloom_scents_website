@@ -7,8 +7,12 @@ const numberMarkVariants = cva("font-heading tnum", {
     variant: {
       /** The scent deck's "No. 01", and the booking aside's step digits. */
       inline: "text-subtitle-sm text-accent",
-      /** The combination cards' "No. 1". */
-      label: "text-body-lg text-accent",
+      /**
+       * The combination cards' "No. 1". The artboard sets the bright accent,
+       * which measures 3.01:1 at 15px on the light ground — the deep ramp step
+       * is the system's own prescribed substitution. See docs/DESIGN-PARITY.md.
+       */
+      label: "text-body-lg text-accent-700",
       /** The Experience steps' watermark, sitting behind the heading. */
       ghost: "pointer-events-none text-numeral leading-none text-accent/16 select-none",
     },

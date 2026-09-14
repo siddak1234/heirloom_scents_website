@@ -10,9 +10,7 @@ export function HomeCombinations() {
     <Section className="pb-25">
       <Rule className="mb-20" />
       <Reveal className="mb-13 text-center">
-        <Eyebrow tone="on-dark" className="text-accent-700">
-          {HOME_COPY.combinationsEyebrow}
-        </Eyebrow>
+        <Eyebrow>{HOME_COPY.combinationsEyebrow}</Eyebrow>
         <h2 className="mt-3 font-heading text-display-sm font-normal">
           {HOME_COPY.combinationsHeading}
         </h2>

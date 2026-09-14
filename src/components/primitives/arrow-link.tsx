@@ -2,7 +2,11 @@ import Link from "next/link";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/cn";
 
-/** The underlined "About Us →" pattern — six instances in the artboards. */
+/**
+ * The underlined "About Us →" pattern. Five call sites: the home story block,
+ * the combination cards, the first experience step, the event cards, and the
+ * booking confirmation (which drops the arrow).
+ */
 const arrowLinkVariants = cva(
   [
     "inline-block border-b uppercase no-underline",
