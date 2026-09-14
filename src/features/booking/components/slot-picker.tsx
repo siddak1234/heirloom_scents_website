@@ -1,6 +1,7 @@
 "use client";
 
 import { format, parseISO } from "date-fns";
+import { BOOKING_COPY } from "@/content/pages";
 import { SLOTS, type Slot } from "../schema";
 import { cn } from "@/lib/cn";
 
@@ -15,11 +16,13 @@ export function SlotPicker({
   readonly taken: readonly Slot[];
   readonly onChange: (slot: Slot) => void;
 }) {
-  const hint = date ? format(parseISO(date), "EEEE, MMM d") : "pick a day first";
+  const hint = date ? format(parseISO(date), "EEEE, MMM d") : BOOKING_COPY.timeHintEmpty;
 
   return (
     <fieldset className="border-0 p-0">
-      <legend className="mb-[9px] text-body-xs tracking-field text-ink-70">Time — {hint}</legend>
+      <legend className="mb-[9px] text-caption-sm tracking-field text-ink/70">
+        {`${BOOKING_COPY.timeLabel} · ${hint}`}
+      </legend>
       <div className="flex flex-col gap-[10px]">
         {SLOTS.map((slot) => {
           const isTaken = taken.includes(slot);
@@ -40,11 +43,11 @@ export function SlotPicker({
                 selected
                   ? "border-accent bg-accent/16 text-ink"
                   : disabled
-                    ? "cursor-default border-divider/60 text-ink-30"
+                    ? "cursor-default border-divider/60 text-ink/30"
                     : "cursor-pointer border-divider text-ink hover:border-accent",
               )}
             >
-              {isTaken ? `${slot} — booked` : slot}
+              {isTaken ? `${slot} ${BOOKING_COPY.bookedSuffix}` : slot}
             </button>
           );
         })}

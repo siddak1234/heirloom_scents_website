@@ -23,25 +23,69 @@ export const IMAGES = {
   "bg-scents-hero": { src: "/images/scents/bg-scents-hero.png", width: 1260, height: 1231 },
   "bottle-berry-cloud": { src: "/images/scents/bottle-berry-cloud.png", width: 1024, height: 572 },
   "bottle-citrus-rose": { src: "/images/scents/bottle-citrus-rose.png", width: 1024, height: 572 },
-  "bottle-golden-vanilla": { src: "/images/scents/bottle-golden-vanilla.png", width: 1024, height: 572 },
-  "bottle-ivory-petals": { src: "/images/scents/bottle-ivory-petals.png", width: 1024, height: 572 },
+  "bottle-golden-vanilla": {
+    src: "/images/scents/bottle-golden-vanilla.png",
+    width: 1024,
+    height: 572,
+  },
+  "bottle-ivory-petals": {
+    src: "/images/scents/bottle-ivory-petals.png",
+    width: 1024,
+    height: 572,
+  },
   "bottle-lychee-rose": { src: "/images/scents/bottle-lychee-rose.png", width: 1024, height: 572 },
-  "bottle-midnight-vanilla": { src: "/images/scents/bottle-midnight-vanilla.png", width: 1024, height: 572 },
-  "bottle-saffron-amber": { src: "/images/scents/bottle-saffron-amber.jpeg", width: 2750, height: 1536 },
-  "bottle-velvet-coffee": { src: "/images/scents/bottle-velvet-coffee.png", width: 1024, height: 572 },
+  "bottle-midnight-vanilla": {
+    src: "/images/scents/bottle-midnight-vanilla.png",
+    width: 1024,
+    height: 572,
+  },
+  "bottle-saffron-amber": {
+    src: "/images/scents/bottle-saffron-amber.jpeg",
+    width: 2750,
+    height: 1536,
+  },
+  "bottle-velvet-coffee": {
+    src: "/images/scents/bottle-velvet-coffee.png",
+    width: 1024,
+    height: 572,
+  },
   "photo-artist-pour": { src: "/images/photos/photo-artist-pour.png", width: 1197, height: 1204 },
   "photo-bottle-hand": { src: "/images/photos/photo-bottle-hand.png", width: 1008, height: 889 },
   "photo-closeup-tray": { src: "/images/photos/photo-closeup-tray.png", width: 1109, height: 1245 },
   "photo-step1-choose": { src: "/images/photos/photo-step1-choose.png", width: 1109, height: 999 },
   "photo-step2-blend": { src: "/images/photos/photo-step2-blend.png", width: 983, height: 1094 },
-  "photo-step3-bottles": { src: "/images/photos/photo-step3-bottles.png", width: 1159, height: 1108 },
+  "photo-step3-bottles": {
+    src: "/images/photos/photo-step3-bottles.png",
+    width: 1159,
+    height: 1108,
+  },
 } as const satisfies Record<string, ImageAsset>;
 
 export const VIDEOS = {
-  "reel-1": { src: "/video/reel-1.mp4", poster: "/video/reel-1-poster.jpg", width: 576, height: 1024 },
-  "reel-2": { src: "/video/reel-2.mp4", poster: "/video/reel-2-poster.jpg", width: 576, height: 1024 },
-  "reel-3": { src: "/video/reel-3.mp4", poster: "/video/reel-3-poster.jpg", width: 576, height: 1024 },
-  "reel-4": { src: "/video/reel-4.mp4", poster: "/video/reel-4-poster.jpg", width: 576, height: 1024 },
+  "reel-1": {
+    src: "/video/reel-1.mp4",
+    poster: "/video/reel-1-poster.jpg",
+    width: 576,
+    height: 1024,
+  },
+  "reel-2": {
+    src: "/video/reel-2.mp4",
+    poster: "/video/reel-2-poster.jpg",
+    width: 576,
+    height: 1024,
+  },
+  "reel-3": {
+    src: "/video/reel-3.mp4",
+    poster: "/video/reel-3-poster.jpg",
+    width: 576,
+    height: 1024,
+  },
+  "reel-4": {
+    src: "/video/reel-4.mp4",
+    poster: "/video/reel-4-poster.jpg",
+    width: 576,
+    height: 1024,
+  },
 } as const satisfies Record<string, VideoAsset>;
 
 export type ImageKey = keyof typeof IMAGES;

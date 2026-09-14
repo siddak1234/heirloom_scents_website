@@ -126,6 +126,14 @@
   --container-wide: 1280px;
   --container-prose: 840px;
   --container-narrow: 680px;
+
+  /* ── Breakpoints ───────────────────────────────────────────────────────────
+     All six artboards carry exactly one media query, `max-width: 860px`, and
+     the same rule set inside it. Tailwind's five defaults are cleared so the
+     codebase cannot quietly grow a second breakpoint the design never drew:
+     `desk:` is the design's own line, and everything below it is the base. */
+  --breakpoint-*: initial;
+  --breakpoint-desk: 861px;
 }
 
 /* Values that must not generate utilities. 79px is the design's own constant:
@@ -178,7 +186,7 @@
   }
 
   a:hover {
-    color: var(--color-accent-600);
+    color: var(--color-accent-800);
   }
 
   img {
@@ -203,6 +211,26 @@
   .tnum {
     font-feature-settings: "tnum";
     font-variant-numeric: tabular-nums;
+  }
+}
+
+/* /scents turns the document itself into a snap deck, as its artboard does by
+   setting scroll-snap-type on <html>. Applied from `desk` up only: a mandatory
+   snap on a phone can strand slide content taller than the viewport, with no
+   way to scroll within the slide. The class is toggled by the route. */
+@media (width >= 861px) {
+  html.hs-snap {
+    scroll-snap-type: y mandatory;
+  }
+}
+
+/* The home page's scent rail hides its scrollbar and pages with buttons
+   instead. Needs both properties — they are the Firefox and WebKit halves of
+   the same thing, and neither has a Tailwind utility. */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
   }
 }
 

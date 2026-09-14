@@ -22,7 +22,12 @@ for (const group of IMAGE_GROUPS) {
     if (!/\.(png|jpe?g|webp|avif)$/i.test(file)) continue;
     const { width, height } = await sharp(`${dir}/${file}`).metadata();
     if (!width || !height) throw new Error(`No dimensions for ${dir}/${file}`);
-    images.push({ key: file.replace(/\.[^.]+$/, ""), src: `/images/${group}/${file}`, width, height });
+    images.push({
+      key: file.replace(/\.[^.]+$/, ""),
+      src: `/images/${group}/${file}`,
+      width,
+      height,
+    });
   }
 }
 
@@ -86,6 +91,4 @@ export function video(key: VideoKey): VideoAsset {
 }
 `,
 );
-console.log(
-  `manifest written: ${String(images.length)} images, ${String(videos.length)} videos`,
-);
+console.log(`manifest written: ${String(images.length)} images, ${String(videos.length)} videos`);

@@ -1,41 +1,27 @@
-import { Emblem } from "@/components/primitives";
+import { Mark } from "@/components/primitives";
 import { cn } from "@/lib/cn";
 
-/**
- * The centred single-message layout shared by 404 and the error boundary.
- * Exists so those two pages cannot drift apart.
- */
+/** The shared shell for /not-found and the error boundary. */
 export function MessagePage({
-  title,
+  heading,
   body,
   children,
-  showEmblem = false,
-  className,
 }: {
-  readonly title: string;
+  readonly heading: string;
   readonly body: string;
   readonly children?: React.ReactNode;
-  readonly showEmblem?: boolean;
-  readonly className?: string | undefined;
 }) {
   return (
-    <div
-      className={cn(
-        "mx-auto flex max-w-narrow flex-col items-center px-6 py-28 text-center",
-        className,
-      )}
-    >
-      {showEmblem ? <Emblem tone="burgundy" height={56} className="mb-8" /> : null}
-      <h1 className="font-heading text-[clamp(1.75rem,5.5vw,var(--text-display-xs))] font-normal">
-        {title}
-      </h1>
-      <p className="mt-4 max-w-[420px] text-body-md/[1.8] text-ink-70">{body}</p>
-      {children ? <ActionRow className="mt-9">{children}</ActionRow> : null}
+    <div className="mx-auto flex min-h-[70vh] max-w-narrow flex-col items-center justify-center px-6 py-24 text-center desk:px-14">
+      <Mark height={48} />
+      <h1 className="mt-8 font-heading text-display-xs leading-[1.08] font-normal">{heading}</h1>
+      <p className="mt-4 text-body-md/[1.8] text-ink/70">{body}</p>
+      {children}
     </div>
   );
 }
 
-/** A centred row of actions. Also used by the burgundy CTA band. */
+/** The row of actions under a message page's copy. */
 export function ActionRow({
   children,
   className,
@@ -43,5 +29,9 @@ export function ActionRow({
   readonly children: React.ReactNode;
   readonly className?: string | undefined;
 }) {
-  return <div className={cn("flex flex-wrap justify-center gap-5", className)}>{children}</div>;
+  return (
+    <div className={cn("mt-10 flex flex-wrap items-center justify-center gap-6", className)}>
+      {children}
+    </div>
+  );
 }

@@ -1,3 +1,4 @@
+import { image } from "@/content/media-manifest";
 import { EVENT_TYPES } from "@/content/pages";
 import { SITE } from "@/content/site";
 
@@ -25,7 +26,7 @@ export function StructuredData() {
           addressCountry: "US",
         },
         areaServed: SITE.serviceArea,
-        image: `${SITE.url}/images/brand/hs-emblem-burgundy.png`,
+        image: `${SITE.url}${image("hs-mark").src}`,
       },
       ...EVENT_TYPES.map((event) => ({
         "@type": "Service",

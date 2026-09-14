@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { DarkBand, Section, SiteFooterSplit } from "@/components/layout";
 import { Reveal } from "@/components/motion";
-import { Emblem, Eyebrow, Plate, Rule } from "@/components/primitives";
+import { Eyebrow, Mark, Plate, PlateFrame, Rule } from "@/components/primitives";
+import { FOOTER_MINIMAL } from "@/content/navigation";
 import { ABOUT_COPY } from "@/content/pages";
-import { FOOTER_ABOUT } from "@/content/navigation";
 import { SITE } from "@/content/site";
 
 export const metadata: Metadata = {
@@ -14,85 +14,74 @@ export const metadata: Metadata = {
 export default function AboutPage() {
   return (
     <>
-      <Section className="grid items-center gap-12 pt-16 pb-20 lg:grid-cols-[1fr_1.1fr] lg:gap-20 lg:pt-24 lg:pb-25">
+      <Section className="grid items-center gap-20 pt-24 pb-25 desk:grid-cols-[1fr_1.1fr]">
         <Plate
-          src="photo-bottle-hand"
-          alt="A finished Heirloom bottle"
+          src="brand-bottles"
+          alt="Finished Heirloom bottles"
           ratio="4/5"
-          sizes="(max-width: 1024px) 100vw, 45vw"
+          sizes="(max-width: 860px) 100vw, 45vw"
+          priority
           liftOnHover
         />
         <div>
-          <Emblem tone="gold" height={44} />
-          <h1 className="mt-6 font-heading text-[clamp(2.25rem,7vw,var(--text-display-sm))] leading-[1.05] font-normal">
+          <Mark height={76} circle alt={`${SITE.name} monogram`} />
+          <h1 className="mt-6.5 font-heading text-display-lg leading-[1.05] font-normal">
             {ABOUT_COPY.heading}
           </h1>
-          <p className="mt-6 text-body-md/[1.9] text-ink-80 md:text-justify">{ABOUT_COPY.body1}</p>
-          <p className="mt-4 text-body-md/[1.9] text-ink-80 md:text-justify">{ABOUT_COPY.body2}</p>
+          <p className="mt-6.5 text-body-md/[1.9] text-ink/78 desk:text-justify">
+            {ABOUT_COPY.body1}
+          </p>
+          <p className="mt-4.5 text-body-md/[1.9] text-ink/78 desk:text-justify">
+            {ABOUT_COPY.body2}
+          </p>
         </div>
       </Section>
 
-      <Section className="pb-20 lg:pb-25">
-        <Rule className="mb-14 lg:mb-18" />
-        <Reveal className="grid items-center gap-12 lg:grid-cols-[1.1fr_1fr] lg:gap-20">
-          <div>
-            <Eyebrow>{ABOUT_COPY.founderEyebrow}</Eyebrow>
-            <blockquote className="mt-5">
-              <p className="font-heading text-[clamp(1.5rem,4.5vw,var(--text-heading-xl))] leading-[1.35] font-normal italic">
-                “{ABOUT_COPY.founderQuote}”
-              </p>
+      <Reveal>
+        <Section className="pb-25">
+          <Rule className="mb-18" />
+          <div className="grid items-center gap-20 desk:grid-cols-[1.1fr_1fr]">
+            <div>
+              <Eyebrow>{ABOUT_COPY.founderEyebrow}</Eyebrow>
+              <blockquote className="mt-5.5 font-heading text-heading-lg leading-[1.35] font-normal italic">
+                {`“${ABOUT_COPY.founderQuote}”`}
+              </blockquote>
               <Eyebrow as="footer" size="md" tone="muted" className="mt-5">
-                — {ABOUT_COPY.founderAttribution}
+                {`— ${ABOUT_COPY.founderAttribution}`}
               </Eyebrow>
-            </blockquote>
+            </div>
+            {/*
+              The artboard's image slot here is empty — no founder portrait
+              exists in the design project. The mat ships as the artboard draws
+              it rather than borrowing an unrelated photograph.
+              See docs/REVAMP-PLAN.md §9.
+            */}
+            <PlateFrame ratio="1/1" liftOnHover className="bg-surface">
+              <p className="flex h-full items-center justify-center px-6 text-center text-label-md tracking-nav text-ink/65 uppercase">
+                Founder portrait to come
+              </p>
+            </PlateFrame>
           </div>
-          <Plate
-            src="photo-closeup-tray"
-            alt={ABOUT_COPY.founderPortraitAlt}
-            ratio="1/1"
-            sizes="(max-width: 1024px) 100vw, 45vw"
-            liftOnHover
-          />
-        </Reveal>
-      </Section>
+        </Section>
+      </Reveal>
 
-      <DarkBand as="section" className="px-6 py-20 md:px-14">
-        <div className="mx-auto grid max-w-content gap-12 text-center sm:grid-cols-3">
-          <div>
-            <Eyebrow size="md" tone="on-dark">
-              Find us
-            </Eyebrow>
-            <p className="mt-3 font-heading text-heading-xs text-cream">
-              {SITE.locality}, {SITE.region}
-            </p>
-            <p className="mt-[6px] text-body-xs text-cream-60">
-              Serving {SITE.serviceArea} &amp; beyond
-            </p>
-          </div>
-          <div>
-            <Eyebrow size="md" tone="on-dark">
-              Write to us
-            </Eyebrow>
-            <p className="mt-3 font-heading text-heading-xs text-cream">
-              <a href={`mailto:${SITE.email}`} className="text-cream hover:text-accent">
-                {SITE.email}
-              </a>
-            </p>
-            <p className="mt-[6px] text-body-xs text-cream-60">
-              Email &amp; phone stubs — to confirm
-            </p>
-          </div>
-          <div>
-            <Eyebrow size="md" tone="on-dark">
-              Follow along
-            </Eyebrow>
-            <p className="mt-3 font-heading text-heading-xs text-cream">{SITE.instagram}</p>
-            <p className="mt-[6px] text-body-xs text-cream-60">Recent celebrations, weekly</p>
-          </div>
-        </div>
-      </DarkBand>
+      <Reveal>
+        <DarkBand className="px-6 py-20 desk:px-14">
+          <ul className="mx-auto grid max-w-content gap-12 text-center desk:grid-cols-3">
+            {ABOUT_COPY.contactColumns.map((column) => (
+              <li key={column.label}>
+                <Eyebrow as="div" size="md" tone="on-dark">
+                  {column.label}
+                </Eyebrow>
+                <p className="mt-3 font-heading text-heading-xs text-cream">{column.value}</p>
+                <p className="mt-1.5 text-caption text-cream/62">{column.note}</p>
+              </li>
+            ))}
+          </ul>
+        </DarkBand>
+      </Reveal>
 
-      <SiteFooterSplit links={FOOTER_ABOUT} />
+      <SiteFooterSplit links={FOOTER_MINIMAL} />
     </>
   );
 }

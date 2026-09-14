@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Lora } from "next/font/google";
-import { SiteHeader } from "@/components/layout";
+import { AnnouncementBar, SiteHeader } from "@/components/layout";
 import { StructuredData } from "@/components/seo/structured-data";
 import { SITE } from "@/content/site";
 import { BRAND_HEX } from "@/styles/brand-constants";
@@ -60,6 +60,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           Skip to content
         </a>
         <StructuredData />
+        <AnnouncementBar />
         <SiteHeader />
         <main id="main" tabIndex={-1}>
           {children}

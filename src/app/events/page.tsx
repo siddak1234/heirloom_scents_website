@@ -1,60 +1,82 @@
 import type { Metadata } from "next";
-import { Section, SiteFooterSplit } from "@/components/layout";
+import { Section, SiteFooterMarked } from "@/components/layout";
 import { Reveal } from "@/components/motion";
 import { CtaBand } from "@/components/patterns/cta-band";
-import { ArrowLink, ButtonLink, Eyebrow, Plate } from "@/components/primitives";
-import { EVENT_TYPES, EVENTS_COPY } from "@/content/pages";
-import { FOOTER_COMPACT } from "@/content/navigation";
-import { MARQUEE_ITEMS } from "@/content/home";
+import { EventTypeCard } from "@/components/patterns/event-type-card";
+import { FilmGrid } from "@/components/patterns/film-grid";
+import { NewsletterBand } from "@/components/patterns/newsletter-band";
+import { StorySplit } from "@/components/patterns/story-split";
+import { VideoBand } from "@/components/patterns/video-band";
+import { ButtonLink, Eyebrow, Rule } from "@/components/primitives";
+import { FOOTER_MINIMAL } from "@/content/navigation";
+import { EVENT_TYPES, EVENTS_COPY, REELS } from "@/content/pages";
 
 export const metadata: Metadata = {
   title: "Events",
-  description: EVENTS_COPY.blurb,
+  description: EVENTS_COPY.celebrateBody.slice(0, 155),
 };
 
 export default function EventsPage() {
   return (
     <>
-      <Section as="header" width="prose" className="pt-16 pb-14 text-center lg:pt-24 lg:pb-20">
-        <Eyebrow>{EVENTS_COPY.eyebrow}</Eyebrow>
-        <h1 className="mt-5 font-heading text-[clamp(2.25rem,7vw,var(--text-display-sm))] leading-[1.04] font-normal">
+      <VideoBand
+        src="reel-4"
+        opacity={0.55}
+        veilFrom={40}
+        veilTo={78}
+        className="h-[76vh] min-h-[480px]"
+      >
+        <Eyebrow tone="on-dark" className="tracking-hero">
+          {EVENTS_COPY.eyebrow}
+        </Eyebrow>
+        <h1 className="mt-4.5 max-w-[820px] font-heading text-display-lg leading-[1.05] font-normal text-cream">
           {EVENTS_COPY.heading}
         </h1>
-        <p className="mx-auto mt-6 max-w-[500px] text-body-md/[1.85] text-ink-70">
-          {EVENTS_COPY.blurb}
-        </p>
-      </Section>
-
-      <Section className="grid gap-14 pb-20 md:grid-cols-2 md:gap-x-12 lg:pb-25">
-        {EVENT_TYPES.map((event) => (
-          <Reveal key={event.slug} className="flex flex-col gap-[18px]">
-            <Plate
-              src={event.image}
-              alt={event.imageAlt}
-              ratio="4/3"
-              sizes="(max-width: 768px) 100vw, 50vw"
-              liftOnHover
-            />
-            <div className="flex items-baseline justify-between gap-4 border-t border-divider pt-[18px]">
-              <h2 className="font-heading text-[clamp(1.5rem,4vw,var(--text-heading-xl))] font-normal">
-                {event.name}
-              </h2>
-              <ArrowLink href="/booking" size="sm">
-                Book this
-              </ArrowLink>
-            </div>
-            <p className="text-body-sm/[1.8] text-ink-70 md:text-justify">{event.body}</p>
-          </Reveal>
-        ))}
-      </Section>
-
-      <CtaBand heading={EVENTS_COPY.ctaHeading} chips={MARQUEE_ITEMS.slice(0, 4)} headingSize="sm">
-        <ButtonLink href="/booking" variant="cream">
-          Book an Event →
+        <ButtonLink href="/booking" variant="cream" size="md" className="mt-8.5">
+          {EVENTS_COPY.heroCta}
         </ButtonLink>
-      </CtaBand>
+      </VideoBand>
 
-      <SiteFooterSplit links={FOOTER_COMPACT} />
+      <StorySplit
+        eyebrow={EVENTS_COPY.celebrateEyebrow}
+        heading={EVENTS_COPY.celebrateHeading}
+        body={EVENTS_COPY.celebrateBody}
+        cta={EVENTS_COPY.celebrateCta}
+        href="/booking"
+        ctaStyle="button"
+        image="brand-cart"
+        imageAlt="The Heirloom cart"
+        imageFirst
+      />
+
+      <Section className="pb-25">
+        <Rule className="mb-18" />
+        <ul className="grid gap-x-12 gap-y-14 desk:grid-cols-2">
+          {EVENT_TYPES.map((event) => (
+            <li key={event.slug}>
+              <EventTypeCard event={event} />
+            </li>
+          ))}
+        </ul>
+      </Section>
+
+      <Section className="pb-27.5">
+        <Rule className="mb-16" />
+        <Reveal className="mb-9 flex items-baseline justify-between gap-6">
+          <Eyebrow>{EVENTS_COPY.filmEyebrow}</Eyebrow>
+          <p className="text-caption-sm text-ink/65">{EVENTS_COPY.filmHint}</p>
+        </Reveal>
+        <FilmGrid reels={REELS} />
+      </Section>
+
+      <CtaBand
+        heading={EVENTS_COPY.ctaHeading}
+        chips={EVENT_TYPES.map((event) => event.name)}
+        cta="Book an Event"
+        href="/booking"
+      />
+      <NewsletterBand />
+      <SiteFooterMarked links={FOOTER_MINIMAL} />
     </>
   );
 }

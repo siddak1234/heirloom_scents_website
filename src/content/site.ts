@@ -12,14 +12,19 @@ const siteSchema = z.object({
   hostEmail: z.email(),
   instagram: z.string(),
   copyrightYear: z.number().int(),
+  /** The dark strip above the nav on every page. */
+  announcement: z.object({ notice: z.string(), cta: z.string() }),
 });
 
 /*
- * NOTE: `email` and `hostEmail` are stubbed in the source artboards ("Email &
- * phone stubs — to confirm"). They render as real content; replacing them is a
- * one-line edit here. docs/ASSETS.md tracks everything still standing in.
+ * `email` and `hostEmail` are stubbed in the source artboards, which label the
+ * contact block "Email & phone stubs, to confirm". They render as real content;
+ * replacing them is a one-line edit here.
+ *
+ * `announcement.notice` names a season and a year. It is the one string on the
+ * site that goes stale on a calendar — it lives here so it can be changed in
+ * one place, not hunted for in markup.
  */
-
 export const SITE = siteSchema.parse({
   name: "Heirloom Scents",
   tagline: "Memory, bottled.",
@@ -32,4 +37,8 @@ export const SITE = siteSchema.parse({
   hostEmail: "host@heirloomscents.com",
   instagram: "@heirloomscents",
   copyrightYear: 2026,
+  announcement: {
+    notice: "Now booking fall and winter 2026 dates",
+    cta: "Book Now",
+  },
 });

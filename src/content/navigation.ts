@@ -3,36 +3,53 @@ export interface NavItem {
   readonly label: string;
 }
 
-/** The five nav destinations, in artboard order. */
+/**
+ * The five nav destinations, in artboard order. Home joins the set in the
+ * redesign — the wordmark is no longer the only way back.
+ *
+ * The artboard file for the scent library is `Notes.dc.html`, but its own nav
+ * labels the page "Scents" and its heading reads "Our Scents". The route is
+ * unchanged.
+ */
 export const NAV_ITEMS = [
-  { href: "/scents", label: "The Scents" },
-  { href: "/experience", label: "The Experience" },
+  { href: "/", label: "Home" },
   { href: "/events", label: "Events" },
+  { href: "/experience", label: "Experience" },
+  { href: "/scents", label: "Scents" },
   { href: "/about", label: "About" },
 ] as const satisfies readonly NavItem[];
 
 export const BOOKING = { href: "/booking", label: "Book an Event" } as const satisfies NavItem;
 
-/** Home's centred footer carries the full set; the split footers carry a subset. */
-export const FOOTER_FULL = [
+/** Home's three-column footer carries the whole site in one column. */
+export const FOOTER_QUICK_LINKS = [
   { href: "/", label: "Home" },
-  ...NAV_ITEMS,
+  { href: "/scents", label: "Scents" },
+  { href: "/experience", label: "Experience" },
+  { href: "/events", label: "Events" },
+  { href: "/about", label: "About" },
   BOOKING,
 ] as const satisfies readonly NavItem[];
 
-export const FOOTER_COMPACT = [
+/* The split footers carry a per-page subset, and call the destination
+   "Booking" rather than "Book an Event". */
+
+/** About and Events. */
+export const FOOTER_MINIMAL = [
   { href: "/", label: "Home" },
-  { href: "/experience", label: "Experience" },
   { href: "/booking", label: "Booking" },
 ] as const satisfies readonly NavItem[];
 
-export const FOOTER_EVENTS = [
+/** Experience. */
+export const FOOTER_EXPERIENCE = [
   { href: "/", label: "Home" },
   { href: "/events", label: "Events" },
   { href: "/booking", label: "Booking" },
 ] as const satisfies readonly NavItem[];
 
-export const FOOTER_ABOUT = [
+/** The scent library's footer, nested inside its final slide. */
+export const FOOTER_SCENTS = [
   { href: "/", label: "Home" },
+  { href: "/experience", label: "Experience" },
   { href: "/booking", label: "Booking" },
 ] as const satisfies readonly NavItem[];

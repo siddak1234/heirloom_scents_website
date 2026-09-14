@@ -1,73 +1,73 @@
-import type { ImageKey } from "./image-manifest";
+import type { ImageKey, VideoKey } from "./media-manifest";
+
+export interface HeroSlide {
+  readonly kicker: string;
+  readonly title: string;
+  readonly blurb: string;
+  readonly cta: string;
+  readonly href: string;
+  /** The filmstrip's three panels. The outer two are hidden below `desk`. */
+  readonly left: ImageKey;
+  readonly center: ImageKey;
+  readonly right: ImageKey;
+}
+
+/** The two-slide hero. Advances every 6.5s, or every 9s after an interaction. */
+export const HERO_SLIDES: readonly HeroSlide[] = [
+  {
+    kicker: "Luxury Perfume Bar",
+    title: "Scents that speak to you",
+    blurb: "Discover your signature scent with our on site custom fragrance experience.",
+    cta: "Book Your Event",
+    href: "/booking",
+    left: "brand-tower",
+    center: "brand-cart",
+    right: "brand-glasses",
+  },
+  {
+    kicker: "Custom Party Favors",
+    title: "Gifts that wow",
+    blurb: "Make every guest feel special with personalized fragrance favors.",
+    cta: "See the Experience",
+    href: "/experience",
+    left: "brand-lamp-row",
+    center: "brand-bottles",
+    right: "brand-gold-stand",
+  },
+];
 
 export interface Combination {
   readonly no: number;
   readonly name: string;
   readonly notes: string;
   readonly blurb: string;
-  /** Anchor on /scents that this blend's notes live under. */
-  readonly anchor: string;
 }
 
-/** "Popular combinations" — the 2×2 card grid on the home page. */
+/** "Popular combinations" — the 2×2 card grid. */
 export const COMBINATIONS: readonly Combination[] = [
   {
     no: 1,
     name: "The First Dance",
     notes: "Ivory Petals · Citrus Rose · Golden Vanilla",
-    blurb: "Our most requested wedding blend — white petals over candlelit vanilla.",
-    anchor: "florals",
+    blurb: "Our most requested wedding blend, white petals over candlelit vanilla.",
   },
   {
     no: 2,
     name: "Velvet Hour",
     notes: "Saffron Amber · Midnight Vanilla · Velvet Coffee",
     blurb: "Candlelight, late toasts, the last songs of the night.",
-    anchor: "golds",
   },
   {
     no: 3,
     name: "Garden Party",
     notes: "Citrus Rose · Berry Cloud · Ivory Petals",
-    blurb: "Bright and effortless — a daytime celebration in a bottle.",
-    anchor: "florals",
+    blurb: "Bright and effortless, a daytime celebration in a bottle.",
   },
   {
     no: 4,
     name: "Something Kept",
     notes: "Velvet Lychee Rose · Saffron Amber · Golden Vanilla",
     blurb: "Lush lychee and rose, kept warm in golden amber.",
-    anchor: "golds",
-  },
-];
-
-export interface Step {
-  readonly no: number;
-  readonly title: string;
-  readonly body: string;
-}
-
-/** The four-step summary in the home page's Experience block. */
-export const HOME_STEPS: readonly Step[] = [
-  {
-    no: 1,
-    title: "Choose your favorite fragrances",
-    body: "Guests smell through the eight house scents and mark what they love — and what they don’t.",
-  },
-  {
-    no: 2,
-    title: "Blend a custom perfume",
-    body: "A blend artist composes trials around their preferences until one feels like theirs.",
-  },
-  {
-    no: 3,
-    title: "Bottle & label",
-    body: "The final blend is hand‑poured and labeled with their name and your date.",
-  },
-  {
-    no: 4,
-    title: "Take the memory home",
-    body: "A keepsake that returns them to your event every time it’s worn.",
   },
 ];
 
@@ -91,38 +91,58 @@ export const TESTIMONIALS: readonly Testimonial[] = [
   },
 ];
 
-/** The scrolling band under the photo interlude. */
+/** The scrolling band between the combinations and the video. */
 export const MARQUEE_ITEMS: readonly string[] = [
-  "Weddings",
-  "Bridal Showers",
-  "Private Events",
-  "Brand Experiences",
+  "Book Your Event",
+  "Custom Favors",
+  "Now Booking",
   "Dallas, Texas",
 ];
 
-export interface GalleryItem {
-  readonly image: ImageKey;
-  readonly alt: string;
+export interface FeatureColumn {
+  readonly title: string;
+  readonly body: string;
 }
 
-export const GALLERY: readonly GalleryItem[] = [
-  { image: "photo-setup-blue", alt: "A wedding perfume bar" },
-  { image: "photo-setup-sage", alt: "Guests blending a scent" },
-  { image: "photo-bottle-hand", alt: "A finished keepsake bottle" },
+export const VALUE_PROPS: readonly FeatureColumn[] = [
+  {
+    title: "A specialist at the bar",
+    body: "Guided scent creation for every guest, from first smell to final pour.",
+  },
+  {
+    title: "Made in our Dallas studio",
+    body: "Eight house scents of our own. Nothing resold, nothing off the shelf.",
+  },
+  {
+    title: "Favors, labeled by hand",
+    body: "Keepsake bottles personalized with your names and your date.",
+  },
 ];
 
 export const HOME_COPY = {
-  heroLead: "HEIRLOOM",
-  heroWordmark: "SCENTS",
-  heroBlurb: "A luxury fragrance bar for weddings, celebrations & everything worth remembering.",
-  memoryHeading: "Memory, bottled.",
-  memoryBody:
-    "Heirloom Scents is a private fragrance bar for events. We bring the cart, the glassware and a library of house‑made scents to your celebration; each guest sits with a blend artist, composes a fragrance around their own preferences, and leaves with it bottled, labeled and boxed. Nothing is resold and nothing is off the shelf — every scent is ours, and every bottle is theirs.",
+  scentsEyebrow: "Explore Our",
+  scentsHeading: "Scents",
+  scentsCta: "Explore All Scents",
   combinationsEyebrow: "Tried & Treasured",
   combinationsHeading: "Popular combinations",
-  combinationsBlurb: "Blends our guests return to, composed from the scent library.",
-  interludeEyebrow: "The Heirloom Cart",
-  interludeHeading: "Bottled at the bar. Kept for years.",
-  eventsHeading: "Your event should have a signature scent.",
-  galleryEyebrow: "From Recent Celebrations",
+  combinationsLink: "Read these scents",
+  videoHeading: "Scents for every guest.",
+  videoBlurb: "Custom labeled fragrance gifts, made just for them.",
+  videoCta: "See It In Motion",
+  aboutEyebrow: "About Us",
+  aboutHeading: "We are Heirloom.",
+  aboutBody:
+    "Heirloom Scents is a private fragrance bar for events. We bring the cart, the glassware and a library of house made scents to your celebration. A perfume specialist guides your guests throughout the event, helping each one customize a fragrance around their own preferences before it leaves bottled, labeled and boxed. Nothing is resold and nothing is off the shelf. Every scent is ours, and every bottle is theirs.",
+  aboutCta: "About Us",
+  testimonialLabel: "What our guests say",
+} as const;
+
+/** The reel behind the home page's video band. */
+export const HOME_VIDEO: VideoKey = "reel-3";
+
+export const NEWSLETTER_COPY = {
+  heading: "Stay in the scent loop.",
+  blurb: "Event news, new house scents and booking windows, once a month.",
+  label: "Your email",
+  cta: "Subscribe",
 } as const;

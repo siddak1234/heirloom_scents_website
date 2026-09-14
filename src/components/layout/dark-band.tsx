@@ -1,8 +1,8 @@
 import { cn } from "@/lib/cn";
 
 /**
- * The burgundy ground every hero, CTA band, interlude and contact block sits on.
- * Twelve instances in the artboards, each previously hard-coding #400d15.
+ * The night ground every hero, CTA band, interlude and contact block sits on.
+ * The redesign uses it fourteen times, each artboard hard-coding #1b1611.
  */
 export function DarkBand({
   children,
@@ -16,7 +16,7 @@ export function DarkBand({
   readonly id?: string | undefined;
 }) {
   return (
-    <As id={id} className={cn("relative overflow-hidden bg-burgundy text-cream", className)}>
+    <As id={id} className={cn("relative overflow-hidden bg-night text-cream", className)}>
       {children}
     </As>
   );

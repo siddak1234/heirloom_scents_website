@@ -1,6 +1,6 @@
 import { cn } from "@/lib/cn";
 
-/** The 1180px content column with the artboards' 56px gutter. */
+/** The content column with the artboards' gutter: 24px, 56px from `desk` up. */
 export function Section({
   children,
   className,
@@ -21,7 +21,7 @@ export function Section({
     narrow: "max-w-narrow",
   }[width];
   return (
-    <As id={id} className={cn("mx-auto w-full px-6 md:px-14", max, className)}>
+    <As id={id} className={cn("mx-auto w-full px-6 desk:px-14", max, className)}>
       {children}
     </As>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { MessagePage } from "@/components/layout";
+import { ActionRow, MessagePage } from "@/components/layout";
 import { Button } from "@/components/primitives";
 
 export default function Error({
@@ -17,10 +17,12 @@ export default function Error({
 
   return (
     <MessagePage
-      title="Something went wrong on our side."
+      heading="Something went wrong on our side."
       body="This page didn’t load correctly. Trying again usually fixes it."
     >
-      <Button onClick={reset}>Try again</Button>
+      <ActionRow>
+        <Button onClick={reset}>Try again</Button>
+      </ActionRow>
     </MessagePage>
   );
 }
