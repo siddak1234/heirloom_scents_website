@@ -8,9 +8,9 @@ import { slideGradient, type Scent } from "@/content/scents";
  * One full-viewport scent slide: the bottle photograph full-bleed, the scent's
  * own gradient fading left to right, and the copy in the left column.
  *
- * Below `desk` the slide grows to fit its copy instead of holding the
- * viewport's height — the artboard's fixed height clips the description on a
- * phone. See docs/DESIGN-PARITY.md.
+ * Below `desk` the slide is at least one screen tall and grows to fit its copy,
+ * rather than holding the artboard's fixed height, which clips the description
+ * on a phone. See docs/DESIGN-PARITY.md.
  */
 export function ScentSlide({
   scent,
@@ -26,7 +26,7 @@ export function ScentSlide({
       {...(scent.anchor ? { id: scent.anchor } : {})}
       data-scent-slide=""
       aria-labelledby={headingId}
-      className="relative min-h-[560px] snap-start snap-always overflow-hidden text-cream desk:h-[calc(100vh-var(--nav-h))]"
+      className="relative min-h-svh snap-start snap-always overflow-hidden text-cream desk:h-[calc(100vh-var(--nav-h))] desk:min-h-0"
     >
       <Image
         src={asset.src}

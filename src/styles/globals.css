@@ -215,12 +215,26 @@
 }
 
 /* /scents turns the document itself into a snap deck, as its artboard does by
-   setting scroll-snap-type on <html>. Applied from `desk` up only: a mandatory
-   snap on a phone can strand slide content taller than the viewport, with no
-   way to scroll within the slide. The class is toggled by the route. */
+   setting scroll-snap-type on <html>. The class is toggled by the route.
+
+   Two strengths, for one reason. `mandatory` forces the resting position onto a
+   snap point, so a slide taller than the viewport has its tail permanently
+   unreachable — the browser pulls you back to the slide's start. Desktop slides
+   are a fixed height and can never overflow, so mandatory is safe and matches
+   the artboard. A phone slide has a floor, not a fixed height: it grows with
+   its copy, and at a large accessibility text size it can exceed the screen.
+   `proximity` snaps when a gesture ends near a slide edge and otherwise leaves
+   the scroll alone, so the deck still lands cleanly without ever stranding
+   text. */
 @media (width >= 861px) {
   html.hs-snap {
     scroll-snap-type: y mandatory;
+  }
+}
+
+@media (width < 861px) {
+  html.hs-snap {
+    scroll-snap-type: y proximity;
   }
 }
 

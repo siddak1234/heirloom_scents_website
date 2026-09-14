@@ -229,6 +229,89 @@ test.describe("scent library", () => {
     );
   });
 
+  /*
+   * A slide shorter than the screen puts two scents on it at once. The floor
+   * was a flat 560px, which is shorter than every phone viewport bar the SE —
+   * a Pixel 7 showed 1.5 slides and nothing pulled them into place.
+   */
+  test("one slide fills the screen, and its copy is never clipped", async ({ page, viewport }) => {
+    await settle(page);
+    await page.goto("/scents");
+    const height = viewport?.height ?? 0;
+
+    const slides = page.locator("[data-scent-slide]");
+    await expect(slides).toHaveCount(8);
+
+    for (let i = 0; i < 8; i++) {
+      const slide = slides.nth(i);
+      await slide.scrollIntoViewIfNeeded();
+      const box = await slide.boundingBox();
+      // Above `desk` the artboard's own calc() governs and is deliberately
+      // shorter than the viewport, because the nav takes the remainder.
+      if (height && (viewport?.width ?? 0) < DESK) {
+        expect(
+          box?.height ?? 0,
+          `slide ${String(i + 1)} is shorter than the screen`,
+        ).toBeGreaterThanOrEqual(height - 1);
+      }
+      // The copy must fit whatever height the slide settled at.
+      const clipped = await slide.evaluate((el) => {
+        const inner = el.querySelector("div.relative");
+        return inner ? inner.scrollHeight - el.getBoundingClientRect().height : 0;
+      });
+      expect(clipped, `slide ${String(i + 1)} clips its copy`).toBeLessThanOrEqual(0);
+    }
+  });
+
+  /*
+   * Deliberately not under reduced motion: globals.css releases the snap
+   * entirely for `prefers-reduced-motion`, so emulating it here would assert
+   * the opposite of what this test is for. The companion assertion is below.
+   */
+  test("the deck snaps to a slide edge", async ({ page }) => {
+    await page.goto("/scents");
+    const tops = await page.evaluate(() =>
+      [...document.querySelectorAll("[data-scent-slide]")].map((s) =>
+        Math.round(s.getBoundingClientRect().top + window.scrollY),
+      ),
+    );
+    const pad = await page.evaluate(() =>
+      parseInt(getComputedStyle(document.documentElement).scrollPaddingTop, 10),
+    );
+    const third = tops[2] ?? 0;
+
+    // Land just short of a slide edge; the deck should settle on it. The snap
+    // target is the slide top less the scroll padding the sticky nav needs.
+    await page.evaluate(
+      (y) => {
+        window.scrollTo({ top: y, behavior: "instant" });
+      },
+      third - pad - 40,
+    );
+    //
+    // Within a pixel, not exactly: the announcement bar and the nav are not
+    // integer heights, so a slide's document top is fractional and rounding
+    // scrollY can land either side of it.
+    await expect
+      .poll(
+        async () =>
+          page.evaluate((expected) => Math.abs(window.scrollY - expected) <= 2, third - pad),
+        { timeout: 5000 },
+      )
+      .toBe(true);
+  });
+
+  test("reduced motion releases the snap, so nothing can trap the scroll", async ({ page }) => {
+    await settle(page);
+    await page.goto("/scents");
+    await expect
+      .poll(
+        async () => page.evaluate(() => getComputedStyle(document.documentElement).scrollSnapType),
+        { timeout: 5000 },
+      )
+      .toBe("none");
+  });
+
   test("the rail is absent below the design's breakpoint", async ({ page, viewport }) => {
     test.skip((viewport?.width ?? 0) >= DESK, "below desk only");
     await settle(page);

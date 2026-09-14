@@ -24,7 +24,7 @@ export default function ScentsPage() {
       <DarkBand
         as="section"
         aria-labelledby="scents-heading"
-        className="flex min-h-[560px] snap-start snap-always desk:h-[calc(100vh-var(--nav-h))]"
+        className="flex min-h-svh snap-start snap-always desk:h-[calc(100vh-var(--nav-h))] desk:min-h-0"
       >
         <KenBurns src="bg-scents-hero" objectPosition="center 40%" durationSeconds={24} />
         <div
@@ -68,7 +68,7 @@ export default function ScentsPage() {
 
       <DarkBand
         as="section"
-        className="flex min-h-[560px] snap-start flex-col desk:h-[calc(100vh-var(--nav-h))]"
+        className="flex min-h-svh snap-start flex-col desk:h-[calc(100vh-var(--nav-h))] desk:min-h-0"
       >
         <div className="flex flex-1 flex-col items-center justify-center px-6 py-20 text-center desk:px-14">
           <Mark height={44} className="opacity-90" />
