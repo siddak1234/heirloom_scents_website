@@ -11,6 +11,12 @@ import { cn } from "@/lib/cn";
  *
  * Hidden below `desk`, where a fixed rail 30px from the edge sits on top of the
  * slide copy. See docs/DESIGN-PARITY.md.
+ *
+ * The artboard's 13px gap between steps is split: 8px of it moves inside each
+ * button as vertical padding, so the target grows from 18px to 26px while the
+ * bars stay on the same 31px pitch. Visually identical, materially easier to
+ * hit — 18px is a hard thing to click, and the rail is the only way to jump
+ * between slides.
  */
 export function ScentRail() {
   const active = useActiveIndex("[data-scent-slide]", SCENTS.length);
@@ -25,7 +31,7 @@ export function ScentRail() {
     <nav
       aria-label="Scent index"
       className={cn(
-        "fixed top-1/2 right-[30px] z-55 hidden -translate-y-1/2 flex-col gap-[13px] transition-opacity duration-500 desk:flex",
+        "fixed top-1/2 right-[30px] z-55 hidden -translate-y-1/2 flex-col gap-[5px] transition-opacity duration-500 desk:flex",
         visible ? "opacity-100" : "pointer-events-none opacity-0",
       )}
     >
@@ -38,7 +44,7 @@ export function ScentRail() {
           }}
           aria-label={scent.name}
           aria-current={i === active}
-          className="flex cursor-pointer items-center justify-end gap-[9px] p-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+          className="flex cursor-pointer items-center justify-end gap-[9px] px-0.5 py-1.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
         >
           <span
             className={cn(

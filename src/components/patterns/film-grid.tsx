@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Play } from "lucide-react";
 import { BackgroundVideo, PlateFrame, RoundButton } from "@/components/primitives";
 import { video, type VideoKey } from "@/content/media-manifest";
 import { wrapIndex } from "@/lib/wrap";
@@ -87,11 +88,8 @@ export function FilmGrid({ reels }: { readonly reels: readonly VideoKey[] }) {
                 className="absolute inset-0 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
               >
                 <BackgroundVideo src={reel} preload="none" className="pointer-events-none" />
-                <span
-                  aria-hidden="true"
-                  className="absolute right-3 bottom-3 flex size-[38px] items-center justify-center rounded-full border border-cream/70 bg-veil/45 text-body-xs text-cream"
-                >
-                  ▶
+                <span className="absolute right-3 bottom-3 flex size-[38px] items-center justify-center rounded-full border border-cream/70 bg-veil/45 text-cream">
+                  <Play aria-hidden="true" size={13} className="translate-x-px fill-current" />
                 </span>
               </button>
             </PlateFrame>
@@ -109,7 +107,7 @@ export function FilmGrid({ reels }: { readonly reels: readonly VideoKey[] }) {
             /* Only the backdrop itself closes — a click on the player must not. */
             if (event.target === event.currentTarget) close();
           }}
-          className="fixed inset-0 z-200 flex items-center justify-center gap-7 bg-veil-deep/93 p-6"
+          className="fixed inset-0 z-200 flex flex-wrap items-center justify-center gap-7 bg-veil-deep/93 p-6 desk:flex-nowrap"
         >
           <RoundButton
             tone="on-dark"
@@ -122,7 +120,7 @@ export function FilmGrid({ reels }: { readonly reels: readonly VideoKey[] }) {
             <span aria-hidden="true">←</span>
           </RoundButton>
 
-          <div className="relative aspect-9/16 h-[min(86vh,780px)] max-w-[80vw]">
+          <div className="relative order-first aspect-9/16 h-[min(86vh,780px)] max-w-[80vw] basis-full desk:order-none desk:basis-auto">
             {/* No captions: the reels carry no dialogue, only a music bed. */}
             <video
               key={current}
