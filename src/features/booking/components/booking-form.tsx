@@ -99,7 +99,7 @@ export function BookingForm({ onBooked }: { readonly onBooked: (r: BookingResult
       noValidate
       className="flex flex-col"
     >
-      <div className="grid gap-5 sm:grid-cols-2">
+      <div className="grid gap-5 desk:grid-cols-2">
         <Field label="Your name" error={errors.name?.message}>
           {({ id, describedBy }) => (
             <Input
@@ -146,7 +146,7 @@ export function BookingForm({ onBooked }: { readonly onBooked: (r: BookingResult
         <input id="company-hp" tabIndex={-1} autoComplete="off" {...register("company")} />
       </div>
 
-      <div className="mt-6 grid items-start gap-7 lg:grid-cols-[1.25fr_1fr]">
+      <div className="mt-6.5 grid items-start gap-7 desk:grid-cols-[1.25fr_1fr]">
         <AvailabilityCalendar
           value={date}
           onChange={(iso) => {
@@ -168,17 +168,23 @@ export function BookingForm({ onBooked }: { readonly onBooked: (r: BookingResult
       </div>
 
       <div className="mt-8 flex flex-wrap items-center gap-5">
-        <Button type="submit" variant="accent" size="lg" disabled={isSubmitting}>
-          {isSubmitting ? "Reserving…" : "Reserve"}
+        <Button
+          type="submit"
+          variant="primary"
+          size="md"
+          disabled={isSubmitting}
+          className="px-11 py-4 tracking-link"
+        >
+          {isSubmitting ? "Reserving…" : BOOKING_COPY.submitLabel}
         </Button>
         {(dateOrSlotError ?? submitError) ? (
-          <p role="alert" className="text-body-xs text-error">
+          <p role="alert" className="text-caption text-accent-800">
             {submitError ?? dateOrSlotError}
           </p>
         ) : null}
       </div>
 
-      <p className="mt-4 text-body-xs text-ink-65">{BOOKING_COPY.disclaimer}</p>
+      <p className="mt-4 text-caption-sm text-ink/65">{BOOKING_COPY.disclaimer}</p>
     </form>
   );
 }

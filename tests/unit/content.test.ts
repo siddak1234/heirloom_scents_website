@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { existsSync } from "node:fs";
-import { SCENTS, SCENT_NAMES } from "@/content/scents";
-import { COMBINATIONS, GALLERY, HOME_STEPS, TESTIMONIALS } from "@/content/home";
-import { EVENT_TYPES, EXPERIENCE_STEPS, INCLUDED } from "@/content/pages";
-import { IMAGES } from "@/content/image-manifest";
+import { SCENTS, SCENT_NAMES, slideGradient } from "@/content/scents";
+import { COMBINATIONS, HERO_SLIDES, TESTIMONIALS, VALUE_PROPS } from "@/content/home";
+import { EVENT_TYPES, EXPERIENCE_STEPS, INCLUDED, REELS } from "@/content/pages";
+import { IMAGES, VIDEOS } from "@/content/media-manifest";
 
 describe("scent library", () => {
   it("has the eight scents in order", () => {
@@ -27,14 +27,21 @@ describe("scent library", () => {
     for (const scent of SCENTS) expect(scent.pairings).not.toContain(scent.name);
   });
 
-  it("keeps the anchors the home page links to", () => {
+  it("keeps the two anchors the artboard names", () => {
     const anchors = SCENTS.filter((s) => s.anchor).map((s) => s.anchor);
-    expect(anchors).toContain("golds");
-    expect(anchors).toContain("florals");
+    expect(anchors).toEqual(["golds", "florals"]);
+  });
+
+  it("builds each slide gradient on the scent's own base, with the shared stops", () => {
+    const gradient = slideGradient("25,10,6");
+    expect(gradient).toBe(
+      "linear-gradient(90deg, rgba(25,10,6,0.86) 0%, rgba(25,10,6,0.62) 40%, " +
+        "rgba(25,10,6,0.1) 68%, rgba(25,10,6,0.22) 100%)",
+    );
   });
 });
 
-describe("image manifest", () => {
+describe("media manifest", () => {
   it("points at files that exist on disk with real dimensions", () => {
     for (const [key, asset] of Object.entries(IMAGES)) {
       expect(existsSync(`public${asset.src}`), `${key} missing on disk`).toBe(true);
@@ -43,27 +50,60 @@ describe("image manifest", () => {
     }
   });
 
-  it("is referenced by every content module that names an image", () => {
-    const keys = new Set(Object.keys(IMAGES));
-    for (const s of SCENTS) expect(keys).toContain(s.image);
-    for (const g of GALLERY) expect(keys).toContain(g.image);
-    for (const e of EVENT_TYPES) expect(keys).toContain(e.image);
-    for (const s of EXPERIENCE_STEPS) expect(keys).toContain(s.image);
+  it("ships a poster beside every reel", () => {
+    for (const [key, asset] of Object.entries(VIDEOS)) {
+      expect(existsSync(`public${asset.src}`), `${key} missing on disk`).toBe(true);
+      expect(existsSync(`public${asset.poster}`), `${key} poster missing on disk`).toBe(true);
+      expect(asset.width, `${key} width`).toBeGreaterThan(0);
+      expect(asset.height, `${key} height`).toBeGreaterThan(0);
+    }
+  });
+
+  it("is referenced by every content module that names an asset", () => {
+    const images = new Set(Object.keys(IMAGES));
+    const videos = new Set(Object.keys(VIDEOS));
+    for (const s of SCENTS) expect(images).toContain(s.image);
+    for (const e of EVENT_TYPES) expect(images).toContain(e.image);
+    for (const s of EXPERIENCE_STEPS) expect(images).toContain(s.image);
+    for (const slide of HERO_SLIDES) {
+      expect(images).toContain(slide.left);
+      expect(images).toContain(slide.center);
+      expect(images).toContain(slide.right);
+    }
+    for (const reel of REELS) expect(videos).toContain(reel);
   });
 });
 
 describe("page content", () => {
   it("carries the counts the artboards show", () => {
+    expect(HERO_SLIDES).toHaveLength(2);
     expect(COMBINATIONS).toHaveLength(4);
-    expect(HOME_STEPS).toHaveLength(4);
+    expect(VALUE_PROPS).toHaveLength(3);
     expect(TESTIMONIALS).toHaveLength(3);
     expect(EVENT_TYPES).toHaveLength(4);
     expect(EXPERIENCE_STEPS).toHaveLength(3);
     expect(INCLUDED).toHaveLength(4);
+    expect(REELS).toHaveLength(4);
   });
 
-  it("links every combination to a real scent anchor", () => {
-    const anchors = new Set(SCENTS.map((s) => s.anchor).filter(Boolean));
-    for (const c of COMBINATIONS) expect(anchors).toContain(c.anchor);
+  it("numbers the combinations 1 to 4", () => {
+    expect(COMBINATIONS.map((c) => c.no)).toEqual([1, 2, 3, 4]);
+  });
+
+  it("names only real scents in every combination", () => {
+    for (const combination of COMBINATIONS) {
+      for (const name of combination.notes.split(" · ")) {
+        expect(SCENT_NAMES, `"${combination.name}" names unknown "${name}"`).toContain(name);
+      }
+    }
+  });
+
+  it("sends both hero slides somewhere real", () => {
+    for (const slide of HERO_SLIDES) expect(slide.href).toMatch(/^\/[a-z]*$/);
+  });
+
+  it("links only step one, as the artboard does", () => {
+    expect(EXPERIENCE_STEPS.filter((s) => s.link)).toHaveLength(1);
+    expect(EXPERIENCE_STEPS[0]?.link?.href).toBe("/scents");
   });
 });

@@ -57,19 +57,19 @@ export function AvailabilityCalendar({
             "pointer-events-auto flex size-8 items-center justify-center rounded-full border border-divider text-ink transition-colors duration-300 hover:border-accent disabled:opacity-30 disabled:pointer-events-none",
           month_grid: "w-full border-collapse",
           weekdays: "grid grid-cols-7 gap-[2px] pb-[6px]",
-          weekday: "text-center text-label-xs tracking-meta text-ink-65 uppercase font-normal",
+          weekday: "text-center text-label-2xs tracking-meta text-ink/65 uppercase font-normal",
           week: "grid grid-cols-7 gap-[2px]",
           day: "p-0",
           day_button:
-            "tnum aspect-square w-full cursor-pointer border border-transparent bg-transparent font-body text-body-xs text-ink transition-colors duration-250 hover:border-accent focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent",
+            "tnum aspect-square w-full cursor-pointer border border-transparent bg-transparent font-body text-caption text-ink transition-colors duration-250 hover:border-accent focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent",
           selected: "[&_button]:border-accent [&_button]:bg-accent/16",
           disabled:
-            "[&_button]:cursor-default [&_button]:text-ink-30 [&_button]:hover:border-transparent",
+            "[&_button]:cursor-default [&_button]:text-ink/26 [&_button]:hover:border-transparent",
           today: "[&_button]:font-semibold",
           outside: "invisible",
         }}
       />
-      <p className="mt-3 text-label-sm text-ink-65">{BOOKING_COPY.calendarNote}</p>
+      <p className="mt-3 text-label-md text-ink/65">{BOOKING_COPY.calendarNote}</p>
     </div>
   );
 }

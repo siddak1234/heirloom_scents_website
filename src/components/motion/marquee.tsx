@@ -14,7 +14,7 @@ export function Marquee({
 }) {
   const track = (
     <div
-      className="flex shrink-0 items-center gap-11 pr-11 text-label-md tracking-eyebrow whitespace-nowrap text-ink-65 uppercase"
+      className="flex shrink-0 items-center gap-11 pr-11 text-label-lg tracking-hero whitespace-nowrap text-ink/66 uppercase"
       aria-hidden="true"
     >
       {items.map((item) => (
@@ -27,7 +27,7 @@ export function Marquee({
   );
 
   return (
-    <div className={cn("overflow-hidden border-b border-divider bg-bg py-[18px]", className)}>
+    <div className={cn("overflow-hidden border-y border-divider bg-bg py-[18px]", className)}>
       {/* The visible content is duplicated and hidden from AT; this carries the text. */}
       <span className="sr-only">{items.join(", ")}</span>
       <div className="flex w-max animate-[hs-marquee_36s_linear_infinite] motion-reduce:animate-none">

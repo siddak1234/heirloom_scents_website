@@ -1,29 +1,29 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/cn";
 
-/** The uppercase accent kicker — fifteen instances across the artboards. */
+/** The uppercase accent kicker — twenty-two instances across the artboards. */
 const eyebrowVariants = cva("uppercase", {
   variants: {
     size: {
-      lg: "text-label-md tracking-eyebrow",
-      md: "text-label-sm tracking-nav",
-      sm: "text-label-xs tracking-widest",
+      lg: "text-label-lg tracking-eyebrow",
+      md: "text-label-md tracking-nav",
+      sm: "text-label-2xs tracking-widest",
     },
     tone: {
       /**
        * Deliberately the deep ramp step, not --color-accent.
        *
-       * The accent measures 3.02:1 on the light ground — enough for icons and
+       * The accent measures 3.02:1 on the light ground — enough for rules and
        * display type, short of the 4.5:1 that 11px label text needs. The
-       * classical readme prescribes exactly this substitution: "for paragraph-size
-       * text in the accent use a deep ramp step (--color-accent-700 on this
-       * ground) rather than the accent itself."
+       * classical readme prescribes exactly this substitution: "for
+       * paragraph-size text in the accent use a deep ramp step
+       * (--color-accent-700 on this ground) rather than the accent itself."
        */
       accent: "text-accent-700",
-      /** The bright accent, for burgundy bands where it measures 4.85:1. */
+      /** The bright accent, for night bands where it measures 5.9:1. */
       "on-dark": "text-accent",
-      cream: "text-cream-60",
-      muted: "text-ink-65",
+      cream: "text-cream/62",
+      muted: "text-ink/65",
     },
   },
   defaultVariants: { size: "lg", tone: "accent" },

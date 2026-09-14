@@ -1,28 +1,23 @@
 import Image from "next/image";
-import { Emblem } from "@/components/primitives";
-import { Eyebrow } from "@/components/primitives";
-import { image, type ImageKey } from "@/content/image-manifest";
-import { cn } from "@/lib/cn";
+import { Mark } from "@/components/primitives";
+import { image, type ImageKey } from "@/content/media-manifest";
 
-/** The full-bleed photo band with a burgundy wash and an italic display line. */
+/**
+ * The full-bleed photo band on /experience: 400px tall, 320px below `desk`,
+ * under a night wash, carrying the mark and one italic display line.
+ */
 export function PhotoInterlude({
   src,
   heading,
-  eyebrow,
-  showEmblem = false,
-  objectPosition = "center 30%",
-  className,
+  objectPosition = "center 40%",
 }: {
   readonly src: ImageKey;
   readonly heading: string;
-  readonly eyebrow?: string | undefined;
-  readonly showEmblem?: boolean;
   readonly objectPosition?: string;
-  readonly className?: string | undefined;
 }) {
   const asset = image(src);
   return (
-    <section className={cn("relative h-[400px] overflow-hidden md:h-[440px]", className)}>
+    <section className="relative h-[320px] overflow-hidden desk:h-[400px]">
       <Image
         src={asset.src}
         alt=""
@@ -32,17 +27,10 @@ export function PhotoInterlude({
         className="object-cover"
         style={{ objectPosition }}
       />
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(color-mix(in srgb, var(--color-burgundy-deep) 55%, transparent), color-mix(in srgb, var(--color-burgundy-deep) 72%, transparent))",
-        }}
-      />
+      <div className="absolute inset-0 bg-linear-to-b from-night/50 to-night/68" />
       <div className="relative flex h-full flex-col items-center justify-center px-6 text-center text-cream">
-        {showEmblem ? <Emblem tone="cream" height={36} className="mb-5 opacity-90" /> : null}
-        {eyebrow ? <Eyebrow tone="on-dark">{eyebrow}</Eyebrow> : null}
-        <p className="mt-[18px] max-w-[640px] font-heading text-[clamp(1.75rem,5vw,2.75rem)] leading-[1.2] font-normal italic">
+        <Mark height={36} className="opacity-90" />
+        <p className="mt-5 max-w-[620px] font-heading text-title-md leading-[1.25] font-normal italic">
           {heading}
         </p>
       </div>

@@ -21,10 +21,9 @@
     "audit:bundle": "node scripts/audit-bundle.mjs",
     "audit:assets": "node scripts/audit-assets.mjs",
     "knip": "knip",
-    "verify": "npm run typecheck && npm run lint && npm run format:check && npm run test && npm run audit:tokens && npm run audit:reuse && npm run knip && npm run build && npm run audit:bundle",
-    "images:manifest": "node scripts/build-image-manifest.mjs",
-    "images:placeholders": "node scripts/generate-placeholders.mjs",
-    "preview": "node scripts/preview.mjs"
+    "verify": "npm run typecheck && npm run lint && npm run format:check && npm run test && npm run audit:tokens && npm run audit:reuse && npm run audit:assets && npm run knip && npm run build && npm run audit:bundle",
+    "preview": "node scripts/preview.mjs",
+    "media:manifest": "node scripts/build-media-manifest.mjs && prettier --write src/content/media-manifest.ts"
   },
   "dependencies": {
     "@daypicker/react": "^10.0.1",
@@ -33,8 +32,6 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.4.0",
     "ics": "^3.12.0",
-    "lucide-react": "^1.33.0",
-    "motion": "^13.1.0",
     "next": "16.3.1",
     "react": "19.2.8",
     "react-dom": "19.2.8",

@@ -1,78 +1,63 @@
 # Assets
 
-## Status
+Every asset is the real thing. There are no placeholders.
 
-|                                          | Count                     |
-| ---------------------------------------- | ------------------------- |
-| Real, extracted from the design project  | **3** (the brand emblems) |
-| Dimension-accurate placeholders          | **20**                    |
-| Total in `src/content/image-manifest.ts` | 23                        |
+| Group                   | Count | Source                                            |
+| ----------------------- | ----- | ------------------------------------------------- |
+| `public/images/brand/`  | 7     | `hs-mark.png` + the six `brand-*.jpg` photographs |
+| `public/images/scents/` | 9     | the eight `bottle-*` and `bg-scents-hero.png`     |
+| `public/images/photos/` | 6     | the `photo-*` studio renders                      |
+| `public/video/`         | 4 + 4 | `reel-1…4.mp4` and a poster frame for each        |
 
-Run `npm run audit:assets` for the current inventory.
+`src/content/media-manifest.ts` is generated from these by
+`npm run media:manifest`, which records every file's real pixel dimensions so
+each `next/image` and `<video>` gets explicit `width` and `height` and the site
+ships zero layout shift. Nothing references an asset except by manifest key.
 
-## Why 20 are placeholders
+## The audit
 
-The Claude Design MCP's `get_file` caps responses at **256 KiB and truncates**
-beyond that. Every source photograph exceeds the cap, so each came back as
-partial, undecodable base64. The three emblems are under the cap and were
-extracted intact.
+`npm run audit:assets` fails the build in **both** directions:
 
-Real pixel dimensions **were** recovered — PNG `IHDR` and JPEG `SOF` headers sit
-in the first bytes and survived truncation. Placeholders are therefore generated
-at the exact source dimensions, in each scent's own overlay tint. Layout,
-aspect ratios, and CLS behaviour are all correct; only the photographic content
-is standing in.
+- a file in the manifest with no file on disk (posters included), and
+- a file on disk that no component references.
 
-## Replacing a placeholder
+It runs inside `npm run verify`, so the redesign cannot strand an asset and a
+component cannot point at one that was deleted.
 
-1. Export the original from the Claude Design project.
-2. Overwrite the file in place, keeping the **same filename and dimensions**.
-3. Run `npm run images:manifest` to regenerate the manifest.
-4. Run `npm test` — a unit test asserts every manifest entry exists on disk with
-   non-zero dimensions.
+## Adding or replacing an asset
 
-No code change is required. Nothing references an image except by manifest key.
+1. Drop the file into the right `public/images/<group>/` or `public/video/`.
+   A video needs a poster beside it, named `<name>-poster.jpg`.
+2. `npm run media:manifest`
+3. Reference it by its new key. `npm test` asserts every manifest entry exists
+   on disk with non-zero dimensions.
 
-## Files to replace
+No other code change is needed.
 
-```
-public/images/scents/
-  bg-scents-hero.png              1260 × 1231
-  bottle-berry-cloud.png          1024 × 572
-  bottle-citrus-rose.png          1024 × 572
-  bottle-golden-vanilla.png       1024 × 572
-  bottle-ivory-petals.png         1024 × 572
-  bottle-lychee-rose.png          1024 × 572
-  bottle-midnight-vanilla.png     1024 × 572
-  bottle-saffron-amber.jpeg       1024 × 572
-  bottle-velvet-coffee.png        1024 × 572
+## Video
 
-public/images/photos/
-  photo-artist-pour.png           1197 × 1204
-  photo-bottle-hand.png           1008 × 889
-  photo-cart-curtain.png          1134 × 1491
-  photo-cart-hero.png             1134 × 1272
-  photo-closeup-tray.png          1109 × 1245
-  photo-hero-bg.png               1260 × 1231
-  photo-setup-blue.png            1159 × 1286
-  photo-setup-sage.png            1159 × 1176
-  photo-step1-choose.png          1109 × 999
-  photo-step2-blend.png            983 × 1094
-  photo-step3-bottles.png         1159 × 1108
-```
+The four reels are 576 × 1024 (9:16), H.264, 30fps, 19–47s, each with an AAC
+track. They were re-encoded from the design project's originals at CRF 28 with
+64 kbit mono audio, which took the set from **17 MB to 9.9 MB** with dimensions,
+duration and audio intact.
 
-`public/images/brand/hs-emblem-{burgundy,cream,gold}.png` are the real files —
-do not replace them.
+There is no `next/image` equivalent for video, so weight is managed by hand:
 
-## Placeholder content
+- Poster frames are extracted at 1s, so the still matches the first frame and
+  the swap into playback is invisible.
+- `BackgroundVideo` never sets `autoPlay`. It starts playback from an effect,
+  pauses when the reel leaves the viewport, and holds the poster under
+  `prefers-reduced-motion`.
+- The four films on `/events` carry `preload="none"`, so the page does not fetch
+  9.9 MB on paint.
 
-Two pieces of copy are stubbed in the artboards themselves and ship as marked
-placeholders:
+## Provenance
 
-| Where                           | Current value                        | Source note                                            |
-| ------------------------------- | ------------------------------------ | ------------------------------------------------------ |
-| `ABOUT_COPY.founderAttribution` | "Founder name & bio to come"         | The artboard reads exactly this.                       |
-| Founder portrait                | Reuses `photo-closeup-tray`          | The artboard's slot is empty.                          |
-| `SITE.email` / `SITE.hostEmail` | `hello@` / `host@heirloomscents.com` | The artboard notes "Email & phone stubs — to confirm". |
+The source project is `~/Desktop/Business Docs/Heirloom Scents/Heirloom Scents
+website redesign/`. Of the 32 files in its `assets/`, 27 are referenced by an
+artboard and imported here. `docs/DESIGN-PARITY.md` lists the five groups that
+are not, and why.
 
-All live in `src/content/` — each is a one-line edit.
+The six `brand-*.jpg` photographs and the four reels are the studio's own
+material; their identity was confirmed by matching md5 against the project's
+`uploads/` rather than by eye.

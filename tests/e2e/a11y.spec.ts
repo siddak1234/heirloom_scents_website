@@ -3,6 +3,14 @@ import AxeBuilder from "@axe-core/playwright";
 
 // Reveal animations transiently lower opacity, which axe would sample as a
 // contrast failure. Reduced motion pins every element to its final state.
+//
+// The experience page's step watermark — a 190px numeral at 16% accent, behind
+// the heading — is excluded. WCAG 1.4.3 exempts text that is pure decoration,
+// and this qualifies on every count: it is aria-hidden, pointer-events:none,
+// user-select:none, and the same number is spelled out in readable text
+// immediately beside it ("Step One"). Raising it to 4.5:1 would make a
+// 190px numeral the loudest thing on the page. See docs/DESIGN-PARITY.md.
+const DECORATIVE = ".text-numeral";
 
 const ROUTES = ["/", "/scents", "/experience", "/events", "/about", "/booking"] as const;
 
@@ -12,6 +20,7 @@ for (const route of ROUTES) {
     await page.goto(route, { waitUntil: "load" });
     const results = await new AxeBuilder({ page })
       .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
+      .exclude(DECORATIVE)
       .analyze();
     expect(
       results.violations,

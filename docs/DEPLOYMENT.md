@@ -28,6 +28,44 @@ boot with zod, so a malformed value fails the deploy rather than the first booki
 | ---------------------- | ------ | ------------------- | --------------------------------------------------------------------------------------------------------------- |
 | `NEXT_PUBLIC_SITE_URL` | Public | Production, Preview | Canonical origin, e.g. `https://heirloomscents.com`. Falls back to the value in `src/content/site.ts` if unset. |
 
+## Soft launch: where bookings go today
+
+**Nothing is persisted and no mail is sent.** `getAvailabilityStore()` returns
+`StaticAvailability`, whose `reserve()` hands back a random reference and stores
+nothing; `getNotifier()` returns `ConsoleNotifier`, which writes to the server
+log. The guest still sees "Your consultation is scheduled" and "Two calendar
+invites have just been sent", because that is what the artboard's confirmation
+screen says.
+
+So during a soft launch **the runtime log is the booking record**, and somebody
+has to read it.
+
+Each enquiry writes one WARN line carrying everything needed to honour it:
+
+```
+[booking] NOT DELIVERED — no email backend configured, this log is the only record:
+{"reference":"HS-AB12CD","name":"…","email":"…","occasion":"Wedding","date":"2026-09-22","slot":"3:00 PM"}
+```
+
+Find them with either:
+
+```bash
+vercel logs <deployment-url> | grep '\[booking\]'
+```
+
+or the project's **Logs** tab, filtered to `Warning` and searching `[booking]`.
+
+Two things to know before relying on this:
+
+- **Vercel retains runtime logs for a limited window**, and the window depends on
+  the plan. An enquiry that is not read inside it is gone. Check the retention
+  figure for the current plan rather than assuming.
+- A guest has **no way to follow up**. There is no public contact address, so an
+  enquiry missed in the log is a lost booking with no second chance.
+
+Set `RESEND_API_KEY` and the enquiry is emailed instead; set `SUPABASE_*` and it
+is also stored. Both are one edit in `src/features/booking/lib/store.ts`.
+
 ### Needed to turn the booking form into real bookings
 
 Until these are set, `/api/bookings` validates the request, enforces the trading

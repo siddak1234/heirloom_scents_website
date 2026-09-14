@@ -1,15 +1,23 @@
 import Image from "next/image";
-import { image, type ImageKey } from "@/content/image-manifest";
+import { image, type ImageKey } from "@/content/media-manifest";
 import { cn } from "@/lib/cn";
 
-/** Slow alternating scale on a full-bleed backdrop image. */
+/**
+ * Slow alternating scale on a full-bleed backdrop image — scale(1) to
+ * scale(1.08), which is the redesign's own keyframe.
+ *
+ * The animation is set inline because the duration varies per instance and
+ * Tailwind cannot extract a class built from a template literal. Reduced motion
+ * is still covered: the global block in globals.css uses `!important`, which
+ * outranks an inline style.
+ */
 export function KenBurns({
   src,
   className,
   opacity,
   objectPosition,
   priority = true,
-  durationSeconds = 22,
+  durationSeconds = 24,
 }: {
   readonly src: ImageKey;
   readonly className?: string | undefined;
@@ -27,11 +35,7 @@ export function KenBurns({
       fill
       priority={priority}
       sizes="100vw"
-      className={cn(
-        "object-cover motion-reduce:animate-none",
-        `animate-[hs-ken-burns_${String(durationSeconds)}s_ease-in-out_infinite_alternate]`,
-        className,
-      )}
+      className={cn("object-cover", className)}
       style={{
         ...(opacity === undefined ? {} : { opacity }),
         ...(objectPosition === undefined ? {} : { objectPosition }),

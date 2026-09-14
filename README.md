@@ -9,7 +9,7 @@ Built from the Claude Design project `Heirloom Scents website redesign`
 ## Stack
 
 Next.js 16 (App Router, Turbopack) · React 19.2 with the React Compiler ·
-TypeScript 6 · Tailwind CSS v4 · Motion · react-hook-form + Zod 4 ·
+TypeScript 6 · Tailwind CSS v4 · react-hook-form + Zod 4 ·
 @daypicker/react · Vitest · Playwright + axe
 
 ## Getting started
@@ -33,10 +33,9 @@ No environment variables are needed to run the site.
 | `npm run audit:tokens`            | Fails if a raw colour appears outside the token layer                      |
 | `npm run audit:reuse`             | Fails if a class string is duplicated across files                         |
 | `npm run audit:bundle`            | Fails if server-only code reaches a client chunk                           |
-| `npm run audit:assets`            | Lists placeholder and unreferenced imagery                                 |
+| `npm run audit:assets`            | Fails if an asset is stranded on disk or missing from disk                 |
 | `npm run knip`                    | Unused files, exports and dependencies                                     |
-| `npm run images:manifest`         | Regenerates the image manifest after replacing imagery                     |
-| `npm run images:placeholders`     | Regenerates stand-in imagery from the extraction report                    |
+| `npm run media:manifest`          | Regenerates the media manifest after adding or replacing an asset          |
 | `npm run preview <url> <out.png>` | Screenshots a route; reports overflow, invisible elements, failed requests |
 
 ## Routes
@@ -56,7 +55,7 @@ No environment variables are needed to run the site.
 - [Deployment](docs/DEPLOYMENT.md) — Vercel setup and every environment variable
 - [Design parity](docs/DESIGN-PARITY.md) — every intentional deviation, with reasons
 - [Assets](docs/ASSETS.md) — which imagery is real and how to replace the rest
-- [Build plan](docs/BUILD_PLAN.md) — the phased plan this was built to
+- [Revamp plan](docs/REVAMP-PLAN.md) — the contract this redesign was ported to
 
 ## Status
 

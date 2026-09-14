@@ -1,47 +1,62 @@
 import Image from "next/image";
-import { Eyebrow, NumberMark, pad2 } from "@/components/primitives";
-import { image } from "@/content/image-manifest";
-import { scentOverlayGradient, type Scent } from "@/content/scents";
+import { NumberMark, pad2 } from "@/components/primitives";
+import { image } from "@/content/media-manifest";
+import { SCENTS_COPY } from "@/content/pages";
+import { slideGradient, type Scent } from "@/content/scents";
 
-/** One full-viewport scent slide: photograph, side wash, and left-aligned copy. */
-export function ScentSlide({ scent }: { readonly scent: Scent }) {
+/**
+ * One full-viewport scent slide: the bottle photograph full-bleed, the scent's
+ * own gradient fading left to right, and the copy in the left column.
+ *
+ * Below `desk` the slide grows to fit its copy instead of holding the
+ * viewport's height — the artboard's fixed height clips the description on a
+ * phone. See docs/DESIGN-PARITY.md.
+ */
+export function ScentSlide({
+  scent,
+  priority = false,
+}: {
+  readonly scent: Scent;
+  readonly priority?: boolean;
+}) {
   const asset = image(scent.image);
+  const headingId = `scent-${scent.slug}`;
   return (
     <section
-      data-scent-slide
       {...(scent.anchor ? { id: scent.anchor } : {})}
-      aria-label={scent.name}
-      className="relative flex min-h-[560px] snap-start overflow-hidden text-cream lg:h-full lg:snap-always"
+      data-scent-slide=""
+      aria-labelledby={headingId}
+      className="relative min-h-[560px] snap-start snap-always overflow-hidden text-cream desk:h-[calc(100vh-var(--nav-h))]"
     >
       <Image
         src={asset.src}
         alt=""
         aria-hidden="true"
         fill
+        priority={priority}
         sizes="100vw"
         className="object-cover"
         style={{ objectPosition: "center 40%" }}
       />
-      <div
-        className="absolute inset-0"
-        style={{
-          background: scentOverlayGradient(scent),
-        }}
-      />
-      <div className="relative mx-auto grid w-full max-w-wide items-center gap-12 px-6 py-16 md:px-18 lg:grid-cols-[1.1fr_1fr]">
+      <div className="absolute inset-0" style={{ background: slideGradient(scent.overlay) }} />
+
+      <div className="relative mx-auto grid h-full max-w-wide items-center gap-12 px-6 py-20 desk:grid-cols-[1.1fr_1fr] desk:px-18 desk:py-0">
         <div>
-          <NumberMark variant="inline">No. {pad2(scent.index)}</NumberMark>
-          <h2 className="mt-3 font-heading text-[clamp(2.25rem,7vw,var(--text-display-md))] leading-[1.02] font-normal text-cream">
+          <NumberMark variant="inline">No.&nbsp;{pad2(scent.index)}</NumberMark>
+          <h2
+            id={headingId}
+            className="mt-3.5 font-heading text-title-lg leading-[1.02] font-normal text-cream desk:text-display-xl"
+          >
             {scent.name}
           </h2>
-          <Eyebrow size="md" tone="on-dark" className="mt-4">
+          <p className="mt-4 text-label-md tracking-eyebrow text-accent uppercase">
             {scent.origin}
-          </Eyebrow>
-          <p className="mt-6 max-w-[480px] text-body-lg/[1.85] text-cream-90">
+          </p>
+          <p className="mt-6 max-w-[480px] text-body-lg/[1.85] text-cream/90">
             {scent.description}
           </p>
-          <p className="mt-6 text-label-md tracking-meta text-cream-60 uppercase">
-            Best paired with · {scent.pairings.join(" · ")}
+          <p className="mt-6.5 text-label-lg tracking-meta text-cream/62 uppercase">
+            {`${SCENTS_COPY.pairedWith} · ${scent.pairings[0]} · ${scent.pairings[1]}`}
           </p>
         </div>
       </div>
