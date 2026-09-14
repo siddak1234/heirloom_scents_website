@@ -140,6 +140,21 @@ test.describe("home — the rest of the page", () => {
     await expect.poll(async () => quote.textContent(), { timeout: 5000 }).toBe(first);
   });
 
+  /*
+   * The Subscribe button stretches to the input's height while they share a
+   * line, but collapsed to its 20px text height once the row wrapped on a
+   * phone — under the 24px WCAG 2.2 minimum, and off the design, which gives
+   * every control a 36px floor.
+   */
+  test("the Subscribe button keeps the design's control height", async ({ page }) => {
+    await settle(page);
+    await page.goto("/");
+    const button = page.getByRole("button", { name: "Subscribe" });
+    await button.scrollIntoViewIfNeeded();
+    const box = await button.boundingBox();
+    expect(box?.height ?? 0).toBeGreaterThanOrEqual(36);
+  });
+
   test("the newsletter rejects an empty and a malformed address", async ({ page }) => {
     await settle(page);
     await page.goto("/");
@@ -324,6 +339,54 @@ test.describe("events", () => {
     await page.getByRole("dialog").getByRole("button", { name: "Close" }).click();
     await expect(page.getByRole("dialog")).toBeHidden();
     await expect(page.getByRole("button", { name: "Play film 3 of 4 with sound" })).toBeFocused();
+  });
+
+  /*
+   * The artboard draws this badge with the ▶ character (U+25B6), which macOS
+   * and iOS render as a colour emoji. The classical readme's instruction is
+   * "Use Lucide icons throughout", so the badge is an inline SVG.
+   */
+  test("the play badge is a real icon, not an emoji glyph", async ({ page }) => {
+    await settle(page);
+    await page.goto("/events");
+    const tile = page.getByRole("button", { name: "Play film 1 of 4 with sound" });
+    await expect(tile.locator("svg")).toHaveCount(1);
+    await expect(tile).not.toContainText("▶");
+  });
+
+  /*
+   * The player is capped at 80vw, so 80vw plus two 46px arrows, two 28px gaps
+   * and 48px of padding overflows every phone. Below `desk` the row wraps and
+   * the arrows drop beneath the player; above it, the artboard's single row is
+   * kept. Either way nothing may leave the viewport.
+   */
+  test("the lightbox keeps every control on screen", async ({ page, viewport }) => {
+    await settle(page);
+    await page.goto("/events");
+    await page.getByRole("button", { name: "Play film 1 of 4 with sound" }).click();
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toBeVisible();
+
+    const width = viewport?.width ?? 0;
+    for (const label of ["Previous film", "Next film", "Close"]) {
+      const box = await dialog.getByRole("button", { name: label }).boundingBox();
+      expect(box, `${label} should have a box`).not.toBeNull();
+      expect(box?.x ?? -1, `${label} clipped at the left edge`).toBeGreaterThanOrEqual(0);
+      expect(
+        (box?.x ?? 0) + (box?.width ?? 0),
+        `${label} clipped at the right edge`,
+      ).toBeLessThanOrEqual(width);
+    }
+
+    // Above the design's breakpoint the artboard's arrangement must be intact:
+    // one row, previous to the left of the player, next to its right.
+    if (width >= DESK) {
+      const prev = await dialog.getByRole("button", { name: "Previous film" }).boundingBox();
+      const next = await dialog.getByRole("button", { name: "Next film" }).boundingBox();
+      const player = await dialog.locator("video").boundingBox();
+      expect((prev?.x ?? 0) + (prev?.width ?? 0)).toBeLessThanOrEqual(player?.x ?? 0);
+      expect(next?.x ?? 0).toBeGreaterThanOrEqual((player?.x ?? 0) + (player?.width ?? 0));
+    }
   });
 
   test("the lightbox player has controls; the tiles stay silent", async ({ page }) => {

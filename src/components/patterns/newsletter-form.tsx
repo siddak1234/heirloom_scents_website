@@ -47,7 +47,7 @@ export function NewsletterForm() {
         }}
         className="min-w-[220px] flex-1"
       />
-      <Button type="submit" variant="primary" size="sm" className="px-[30px] py-0">
+      <Button type="submit" variant="primary" size="sm" className="min-h-9 px-[30px] py-0">
         {NEWSLETTER_COPY.cta}
       </Button>
       <p role="status" aria-live="polite" className="w-full text-caption-sm text-ink/65">
