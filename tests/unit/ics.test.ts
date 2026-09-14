@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { buildConsultationIcs } from "@/features/booking/lib/ics";
 import { formatWhen } from "@/features/booking/lib/format";
-import { guestEmailText, hostEmailText } from "@/features/booking/lib/notify";
+import { bookingLogLine, guestEmailText, hostEmailText } from "@/features/booking/lib/notify";
 
 const DETAILS = {
   name: "Ada Lovelace",
@@ -59,5 +59,28 @@ describe("email bodies", () => {
   it("gives the host the enquiry", () => {
     expect(hostEmailText(DETAILS)).toContain("ada@example.com");
     expect(hostEmailText(DETAILS)).toContain("Wedding");
+  });
+});
+
+/*
+ * Until a transport is wired, this line is the only record a booking leaves.
+ * It has to be one line and it has to be complete, or a soft launch quietly
+ * loses enquiries.
+ */
+describe("booking log line", () => {
+  it("is a single line", () => {
+    expect(bookingLogLine(DETAILS)).not.toContain("\n");
+  });
+
+  it("carries every field needed to honour the booking by hand", () => {
+    const parsed: unknown = JSON.parse(bookingLogLine(DETAILS));
+    expect(parsed).toEqual({
+      reference: DETAILS.reference,
+      name: DETAILS.name,
+      email: DETAILS.email,
+      occasion: DETAILS.occasion,
+      date: DETAILS.date,
+      slot: DETAILS.slot,
+    });
   });
 });
