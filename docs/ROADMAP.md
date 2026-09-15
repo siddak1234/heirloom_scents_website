@@ -11,68 +11,97 @@ covers environment and backends.
 
 ## The three decisions to make first
 
-### 1. Booking: Calendly, not the custom calendar — recommended
+### 1. Booking: Cal.com, on its free plan
 
-The booking screen is built and beautiful, and it is the wrong thing to own.
+The booking screen is built and beautiful, and it is still the wrong thing to
+own.
 
 **The deciding argument is double-booking.** The current implementation has no
 connection to anyone's real calendar. `StaticAvailability` reports every
-non-Sunday, non-Monday slot as free, so it will happily take a 3:00 PM
-consultation that is already a dentist appointment. Nothing in the codebase can
-know otherwise without integrating Google or Outlook — which is most of what a
-scheduling product is.
+non-Sunday, non-Monday slot as free, so it will take a 3:00 PM consultation that
+is already a dentist appointment, and nothing in the codebase can know otherwise
+without integrating Google or Outlook — which is most of what a scheduling
+product is. Reminders, reschedule, cancellation, timezone and DST correctness,
+and an owner-facing dashboard are all unbuilt and all standard in a scheduler.
 
-The rest follows: reminders, reschedule, cancellation, timezone and DST
-correctness, and a dashboard the owner can use without a developer. All unbuilt.
-All standard in a scheduler.
+It also removes **Supabase and Resend from the critical path**: the booking stops
+evaporating the day it is embedded, with no API keys to provision.
 
-Choosing Calendly also removes **Supabase and Resend from the critical path** —
-the booking stops evaporating the day it is embedded, with no API keys to
-provision and no persistence layer to write.
+**Free plans differ sharply, and it decides which one.**
 
-|         | Calendly                                   | Cal.com                      |
-| ------- | ------------------------------------------ | ---------------------------- |
-| Turnkey | Yes                                        | Mostly                       |
-| Theming | Limited — brand colour and font only       | Deeper, and self-hostable    |
-| Cost    | Free tier, ~$12/user/mo for the useful one | Free tier, self-host or ~$15 |
+|                      | Calendly free         | Cal.com free                     |
+| -------------------- | --------------------- | -------------------------------- |
+| Event types          | **One**               | Unlimited                        |
+| Calendar connections | **One**               | Unlimited                        |
+| Reminders            | **Paid only**         | Included                         |
+| Payments             | Paid only             | Included                         |
+| Theming              | Brand colour and font | Deeper; also self-hostable (MIT) |
+| Next tier up         | $10/seat/mo annual    | ~$12/user/mo annual              |
 
-Pick **Calendly** unless the booking page's exact look matters more than the
-time; then **Cal.com**.
+Calendly's free tier allows a single event type with no reminders, which is the
+one feature that actually reduces no-shows. Cal.com's free tier covers unlimited
+event types and calendars, payments and reminders for an individual — which is
+exactly this business. **Use Cal.com, free.** Self-hosting is available later
+and costs a small VPS, but the hosted free plan is the right starting point;
+running your own adds servers, backups and patching for no benefit at this size.
 
-**What it costs:** the artboard's left aside stays exactly as drawn — night
-panel, mark, the three numbered steps. The right column hosts an inline embed
-instead of the hand-built calendar. Deleted: `availability-calendar.tsx`,
-`slot-picker.tsx`, `availability.ts`, `store.ts`, both API routes, and their
-tests. `ics.ts` and the `.ics` unit tests go too — Calendly sends the invite.
+**What it costs in code:** the artboard's left aside stays exactly as drawn —
+night panel, mark, the three numbered steps. The right column hosts an inline
+embed instead of the hand-built calendar. Deleted: `availability-calendar.tsx`,
+`slot-picker.tsx`, `availability.ts`, `store.ts`, both API routes, `ics.ts`, and
+their tests.
 
-**Keep the custom calendar only if** the booking page's pixel fidelity is worth
-building calendar sync, reminders and reschedule flows yourself. It is not, for
-a business this size.
+### 2. Commerce: Shopify as the engine, this site as the storefront
 
-### 2. Payments: Stripe and Shopify answer different questions
+Two separate jobs. Do not conflate them.
 
-They are not alternatives. Decide which job you are doing.
+**A deposit taken at booking** → Stripe, or Cal.com's built-in payments. No
+catalogue, no shipping. Days.
 
-**Taking a deposit or retainer when someone books** → **Stripe**. A Payment Link
-or Checkout Session. No catalog, no shipping, no inventory. Days of work, and it
-fits the business as it exists today.
+**Bottles that ship to customers** → Shopify. The reason is not the cart; carts
+are easy. It is everything behind the cart: sales-tax nexus, live carrier rates,
+inventory, refunds, fulfilment, and an admin a non-technical owner can run
+without a developer. That is months to build here and then yours to maintain
+forever.
 
-**Selling bottles that ship to customers** → **Shopify**. Not Stripe, and not a
-cart built here. Retail needs tax by jurisdiction, live shipping rates,
-inventory, order management, returns, customer accounts, and an admin a
-non-technical owner can run. Shopify is all of that on day one; building it in
-this codebase is months, and then it is yours to maintain.
+Three prebuilt routes, all real, with their actual costs:
 
-If retail happens, start with Shopify's own storefront on `shop.heirloomscents.com`
-— days, not months. Go headless (Shopify Storefront API rendered by this Next
-app) later, and only if the design mismatch between the two actually bothers
-you.
+|                     | Monthly                     | Per sale       | Checkout               | Admin & fulfilment |
+| ------------------- | --------------------------- | -------------- | ---------------------- | ------------------ |
+| **Shopify Starter** | $5                          | 5% + 30¢       | Shopify-hosted         | Full               |
+| **Shopify Basic**   | $39                         | card rates     | Shopify-hosted         | Full               |
+| **Snipcart**        | $20 floor, then 2% of sales | + gateway fees | **Stays on your site** | Thinner            |
+
+At roughly $1,000/month in sales these land within about $20 of each other. By
+$5,000/month Shopify Basic is the cheapest of the three, because its 2.9%-ish
+card rate beats Starter's flat 5% and Snipcart's 2% _plus_ gateway.
+
+**Recommended: Shopify Basic, surfaced headlessly through this Next.js app.**
+The Storefront API reads products, this app renders the listing, the detail page
+and the cart in the existing design, and checkout hands off to Shopify's hosted
+checkout. Shopify's own documentation and plan terms allow exactly this on
+Basic — the $40k–150k figures quoted around "headless Shopify" are agency build
+costs, not a platform requirement.
+
+Why not the other two:
+
+- **Snipcart** keeps checkout on-site, which is genuinely nicer, but leaves you
+  writing shipping logic through webhooks and bolting on a tax service. For a
+  product with carrier restrictions that is the wrong place to be improvising.
+- **Shopify Starter** at 5% + 30¢ is the fastest possible start and a fine way
+  to test demand for a month, but the rate is punitive past a few hundred
+  dollars a month.
+
+**Fastest possible path if the design can wait:** Shopify Basic with a themed
+store on `shop.heirloomscents.com`, linked from the nav. Days, not weeks, and it
+can be replaced by the headless version later without changing Shopify.
 
 > **The constraint that decides whether retail is viable at all:** alcohol-based
 > perfume is a flammable liquid. It ships as a limited quantity / ORM-D ground
 > shipment, and most carriers restrict or refuse it by air for consumer parcels.
-> This is an operations question, not a platform one, and it needs answering
-> before either platform is chosen.
+> This is an operations question, not a platform one — but it is also the single
+> strongest argument for Shopify, whose shipping profiles and carrier apps are
+> built for exactly this kind of restriction.
 
 ### 3. Social icons need a brand-icon set
 
@@ -92,11 +121,13 @@ in the home footer and the About contact block.
 The site is live and every enquiry currently evaporates. Nothing else in this
 document matters as much.
 
-- [ ] Decide Calendly vs Cal.com vs keeping the custom calendar
-- [ ] Create the account; connect the owner's real Google/Outlook calendar
+- [ ] Confirm Cal.com (free) over Calendly free — Calendly's free tier is one
+      event type with no reminders
+- [ ] Create the Cal.com account; connect the owner's real Google/Outlook
+      calendar so it can never double-book
 - [ ] Set the event type: 30 minutes, video or phone, the artboard's four
       occasions as a required question
-- [ ] Set brand colour `#b68235` and the closest available font
+- [ ] Set brand colour `#b68235`, and a reminder on the event type
 - [ ] Embed inline in the booking page's right column; keep the aside as drawn
 - [ ] Delete the superseded calendar, slot picker, availability lib, store,
       both API routes, `ics.ts`, and their tests
@@ -173,15 +204,17 @@ code.
       checkout, order confirmation or order status screen. These need drawing
       before anything is ported
 
-Then, assuming Shopify:
+Then, on Shopify Basic:
 
-- [ ] Shopify store; catalogue from the eight house scents
+- [ ] Shopify Basic store; catalogue from the eight house scents
+- [ ] Decide the surface: headless through this app (keeps the design) or a
+      themed store on `shop.heirloomscents.com` (days, replaceable later)
 - [ ] Shipping profiles reflecting the flammable-liquid restrictions
 - [ ] Tax registration for the nexus states
 - [ ] Order and fulfilment workflow the owner can run
 - [ ] Returns policy, published
-- [ ] Decide storefront vs headless; if headless, port the design to the
-      Storefront API
+- [ ] If headless: `@shopify/storefront-api-client`, a listing page, a product
+      page and a cart in the existing design, handing off to Shopify checkout
 - [ ] Link it from the nav — the one change this site needs either way
 
 ---
