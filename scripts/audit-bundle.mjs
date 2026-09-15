@@ -1,10 +1,14 @@
 /**
  * Guards the server/client boundary in the built output.
  *
- * A single import can drag a server-only library into the browser: the booking
- * confirmation once imported a date formatter from the email module, which
- * imported the `ics` calendar library — shipping ~190 KB of iCalendar code to
- * every visitor. This catches that class of regression.
+ * A single import can drag a server-only library into the browser, and a single
+ * misplaced `process.env` can inline a secret into a client chunk, where it is
+ * readable by anyone who views source. This catches both.
+ *
+ * The project holds no server secrets today — the booking flow that needed
+ * them was replaced by a hosted scheduler. The denylist is therefore
+ * forward-looking: it is the shape of the credentials this site will hold when
+ * Shopify and payments land. Add a name here whenever a secret is introduced.
  *
  * Run after `next build`.
  */
@@ -13,14 +17,25 @@ import { join } from "node:path";
 
 const CLIENT_DIR = ".next/static/chunks";
 
-/** Fingerprints that must never appear in a client chunk, with why. */
+/** Secret env var NAMES that must never be referenced from a client chunk. */
 const FORBIDDEN = [
-  { needle: "BEGIN:VCALENDAR", why: "the `ics` calendar library is server-only" },
-  { needle: "SUPABASE_SERVICE_ROLE_KEY", why: "service-role key must never reach the browser" },
-  { needle: "RESEND_API_KEY", why: "email API key must never reach the browser" },
-  { needle: "TURNSTILE_SECRET_KEY", why: "Turnstile secret must never reach the browser" },
-  { needle: "guestEmailText", why: "email bodies are server-only" },
-  { needle: "hostEmailText", why: "email bodies are server-only" },
+  { needle: "SHOPIFY_ADMIN_ACCESS_TOKEN", why: "the Shopify Admin token is server-only" },
+  { needle: "SHOPIFY_ADMIN_API_TOKEN", why: "the Shopify Admin token is server-only" },
+  { needle: "SHOPIFY_WEBHOOK_SECRET", why: "webhook signing secret is server-only" },
+  { needle: "STRIPE_SECRET_KEY", why: "the Stripe secret key is server-only" },
+  { needle: "STRIPE_WEBHOOK_SECRET", why: "webhook signing secret is server-only" },
+];
+
+/**
+ * Secret VALUE prefixes. Catches the worse failure — a real credential inlined
+ * into the bundle, where the variable name has already been compiled away.
+ */
+const SECRET_SHAPES = [
+  { re: /\bshpat_[0-9a-f]{32}/, why: "a Shopify Admin API access token" },
+  { re: /\bshpss_[0-9a-f]{32}/, why: "a Shopify shared secret" },
+  { re: /\bsk_live_[0-9A-Za-z]{20}/, why: "a live Stripe secret key" },
+  { re: /\bre_[0-9A-Za-z]{20}/, why: "a Resend API key" },
+  { re: /\bwhsec_[0-9A-Za-z]{20}/, why: "a webhook signing secret" },
 ];
 
 function walk(dir) {
@@ -45,16 +60,20 @@ const problems = [];
 for (const chunk of chunks) {
   const source = readFileSync(chunk, "utf8");
   for (const { needle, why } of FORBIDDEN) {
-    if (source.includes(needle)) problems.push(`${chunk}\n      contains "${needle}" — ${why}`);
+    if (source.includes(needle)) problems.push(`${chunk}\n      references "${needle}" — ${why}`);
+  }
+  for (const { re, why } of SECRET_SHAPES) {
+    if (re.test(source)) problems.push(`${chunk}\n      contains what looks like ${why}`);
   }
 }
 
 if (problems.length) {
-  console.error(`✗ server-only code found in ${String(problems.length)} client chunk(s):\n`);
+  console.error(`✗ ${String(problems.length)} server/client boundary problem(s):\n`);
   for (const p of problems) console.error("  " + p);
   console.error(
-    "\nSplit the shared helper into its own module so the client does not pull the server dependency.",
+    "\nMove the value behind a server-only module or a route handler. If a secret\n" +
+      "has already shipped, rotate it — the bundle is public.",
   );
   process.exit(1);
 }
-console.log(`✓ bundle: ${String(chunks.length)} client chunks, no server-only code`);
+console.log(`✓ bundle: ${String(chunks.length)} client chunks, no leaked credentials`);

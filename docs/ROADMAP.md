@@ -129,7 +129,7 @@ The custom booking flow is replaced, not extended. Everything it needed —
 Supabase, Resend, Turnstile, `.ics` generation, availability rules, the
 honeypot — goes with it. Calendly owns all of that now.
 
-### Build
+### Build — code done, account pending
 
 - [ ] Calendly account, free plan
 - [ ] Connect the owner's real Google or Outlook calendar, so it cannot
@@ -141,39 +141,39 @@ honeypot — goes with it. Calendly owns all of that now.
 - [ ] Brand colour `#b68235`
 - [ ] Confirm the owner gets the booking email, and the event lands on the
       calendar with the link attached
-- [ ] `CalendlyEmbed` client component — inline embed, their script, lazy
-- [ ] Rewrite `sections/booking.tsx`: the artboard's night aside stays exactly
+- [x] `CalendlyEmbed` client component — inline embed, their script, lazy
+- [x] Rewrite `sections/booking.tsx`: the artboard's night aside stays exactly
       as drawn — mark, `h1`, the three numbered steps — and the right column
       hosts the embed instead of the hand-built calendar
-- [ ] e2e: the embed loads on `/booking` at all four viewports, and the page
+- [x] e2e: the embed loads on `/booking` at all four viewports, and the page
       keeps one `h1` and no horizontal overflow
 
-### Delete — 1,374 lines and 5 dependencies
+### Delete — done: 1,374 lines and 5 dependencies
 
 Nothing below has a consumer once the embed lands. Verified by grep, not
 assumed.
 
-- [ ] `src/features/booking/` — all 12 files, 842 lines
-- [ ] `src/app/api/availability/route.ts` and `src/app/api/bookings/route.ts`
-- [ ] `src/lib/env.ts` — 43 lines. Its only exports are `hasBookingBackend` and
+- [x] `src/features/booking/` — all 12 files, 842 lines
+- [x] `src/app/api/availability/route.ts` and `src/app/api/bookings/route.ts`
+- [x] `src/lib/env.ts` — 43 lines. Its only exports are `hasBookingBackend` and
       `hasEmailBackend`, and `store.ts` is their only consumer
-- [ ] `tests/unit/availability.test.ts`, `tests/unit/ics.test.ts`,
+- [x] `tests/unit/availability.test.ts`, `tests/unit/ics.test.ts`,
       `tests/e2e/booking.spec.ts` — 400 lines
-- [ ] Dependencies: `@daypicker/react`, `date-fns`, `ics`, `react-hook-form`,
+- [x] Dependencies: `@daypicker/react`, `date-fns`, `ics`, `react-hook-form`,
       `@hookform/resolvers`. Each is used by the booking form alone. `zod`
       stays — `content/site.ts` and `content/scents.ts` still validate with it
-- [ ] `Field` and `Select` from `primitives/field.tsx`. `Input` survives, used
+- [x] `Field` and `Select` from `primitives/field.tsx`. `Input` survives, used
       by the newsletter form
-- [ ] `SITE.hostEmail` — existed only to fill the `.ics` organizer
-- [ ] `OCCASIONS` — becomes a question inside Calendly
-- [ ] From `BOOKING_COPY`, everything Calendly now owns: `submitLabel`,
+- [x] `SITE.hostEmail` — existed only to fill the `.ics` organizer
+- [x] `OCCASIONS` — becomes a question inside Calendly
+- [x] From `BOOKING_COPY`, everything Calendly now owns: `submitLabel`,
       `disclaimer`, `calendarNote`, `timeLabel`, `timeHintEmpty`,
       `bookedSuffix`, `confirmHeading`, `confirmNote`, `inviteHeader`,
       `inviteAttachment`, `backHome`, `bookAnother`. Keep `eyebrow`,
       `asideHeading`, `asideBlurb`, `asideSteps`, `formHeading`
-- [ ] `docs/DEPLOYMENT.md` — the Supabase, Resend, Turnstile, soft-launch and
+- [x] `docs/DEPLOYMENT.md` — the Supabase, Resend, Turnstile, soft-launch and
       `.ics` timezone sections. Replace with the Calendly setup
-- [ ] `docs/DESIGN-PARITY.md` — the availability-mock, calendar-grid and
+- [x] `docs/DESIGN-PARITY.md` — the availability-mock, calendar-grid and
       confirmation-copy rows, replaced with one row explaining the embed
 
 ### Gate
