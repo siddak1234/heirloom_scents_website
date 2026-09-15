@@ -56,6 +56,7 @@ No environment variables are needed to run the site.
 - [Design parity](docs/DESIGN-PARITY.md) — every intentional deviation, with reasons
 - [Assets](docs/ASSETS.md) — which imagery is real and how to replace the rest
 - [Revamp plan](docs/REVAMP-PLAN.md) — the contract this redesign was ported to
+- [Roadmap](docs/ROADMAP.md) — what is left to build, phased, and the decisions each phase needs
 
 ## Status
 
