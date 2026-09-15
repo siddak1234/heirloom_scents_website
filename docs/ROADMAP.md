@@ -11,7 +11,7 @@ covers environment and backends.
 
 ## The three decisions to make first
 
-### 1. Booking: Cal.com, on its free plan
+### 1. Booking: Calendly, free plan — DECIDED
 
 The booking screen is built and beautiful, and it is still the wrong thing to
 own.
@@ -38,12 +38,19 @@ evaporating the day it is embedded, with no API keys to provision.
 | Theming              | Brand colour and font | Deeper; also self-hostable (MIT) |
 | Next tier up         | $10/seat/mo annual    | ~$12/user/mo annual              |
 
-Calendly's free tier allows a single event type with no reminders, which is the
-one feature that actually reduces no-shows. Cal.com's free tier covers unlimited
-event types and calendars, payments and reminders for an individual — which is
-exactly this business. **Use Cal.com, free.** Self-hosting is available later
-and costs a small VPS, but the hosted free plan is the right starting point;
-running your own adds servers, backups and patching for no benefit at this size.
+**Decision: Calendly, free plan.** The two limits that argued against it do not
+apply here. One event type is enough — the occasion (wedding, graduation, other)
+is a question on the booking form, not a separate event type. Reminders are paid
+only, and are not needed because the consultation lands on the owner's real
+calendar. Video conferencing is free on every Calendly plan, so the booking
+creates its own Teams, Meet or Zoom link.
+
+No payment is taken: the consultation is free.
+
+Note the mechanics, because they are often misread. The booking does not send an
+email that then has to create an invite. Calendly writes the event straight into
+the owner's connected calendar with the video link attached, and emails both
+sides as a notification.
 
 **What it costs in code:** the artboard's left aside stays exactly as drawn —
 night panel, mark, the three numbered steps. The right column hosts an inline
@@ -121,13 +128,12 @@ in the home footer and the About contact block.
 The site is live and every enquiry currently evaporates. Nothing else in this
 document matters as much.
 
-- [ ] Confirm Cal.com (free) over Calendly free — Calendly's free tier is one
-      event type with no reminders
-- [ ] Create the Cal.com account; connect the owner's real Google/Outlook
+- [ ] Create the Calendly account; connect the owner's real Google/Outlook
       calendar so it can never double-book
 - [ ] Set the event type: 30 minutes, video or phone, the artboard's four
       occasions as a required question
-- [ ] Set brand colour `#b68235`, and a reminder on the event type
+- [ ] Set brand colour `#b68235`; add the occasion question (wedding,
+      graduation, other) to the booking form
 - [ ] Embed inline in the booking page's right column; keep the aside as drawn
 - [ ] Delete the superseded calendar, slot picker, availability lib, store,
       both API routes, `ics.ts`, and their tests
