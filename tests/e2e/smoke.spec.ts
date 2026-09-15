@@ -40,10 +40,16 @@ test("every internal link resolves", async ({ page, request }) => {
 
 // The artboard puts an id on two of the eight slides. Nothing in the site links
 // to them any more, but they are stable deep-link targets and are kept.
+//
+// `domcontentloaded`, not the default `load`: this asserts that an anchor
+// resolves to the right slide, which needs the DOM and not nine decoded
+// photographs. /scents carries 12MB of imagery, and waiting for all of it twice
+// in one test exceeded the 30s budget on a cold CI runner. Image delivery is
+// covered by the per-route smoke test above and by the manifest unit test.
 test("the two scent anchors the artboard names still land", async ({ page }) => {
-  await page.goto("/scents#florals");
+  await page.goto("/scents#florals", { waitUntil: "domcontentloaded" });
   await expect(page.locator("#florals")).toContainText("Citrus Rose");
-  await page.goto("/scents#golds");
+  await page.goto("/scents#golds", { waitUntil: "domcontentloaded" });
   await expect(page.locator("#golds")).toContainText("Saffron Amber");
 });
 
