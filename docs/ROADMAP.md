@@ -123,105 +123,141 @@ in the home footer and the About contact block.
 
 ---
 
-## Phase 1 — Stop losing bookings
+## Phase 1 — Calendly, and the cleanup it forces
 
-The site is live and every enquiry currently evaporates. Nothing else in this
-document matters as much.
+The custom booking flow is replaced, not extended. Everything it needed —
+Supabase, Resend, Turnstile, `.ics` generation, availability rules, the
+honeypot — goes with it. Calendly owns all of that now.
 
-- [ ] Create the Calendly account; connect the owner's real Google/Outlook
-      calendar so it can never double-book
-- [ ] Set the event type: 30 minutes, video or phone, the artboard's four
-      occasions as a required question
-- [ ] Set brand colour `#b68235`; add the occasion question (wedding,
-      graduation, other) to the booking form
-- [ ] Embed inline in the booking page's right column; keep the aside as drawn
-- [ ] Delete the superseded calendar, slot picker, availability lib, store,
-      both API routes, `ics.ts`, and their tests
-- [ ] Remove `@daypicker/react`, `date-fns` and `ics` if nothing else uses them
-- [ ] Rewrite the e2e booking spec against the embed
-- [ ] Update `DEPLOYMENT.md` and `DESIGN-PARITY.md`
+### Build
 
-**If the custom calendar is kept instead**, this phase becomes: install
-`resend`, implement `ResendNotifier`, flip the seam in `store.ts`, set
-`RESEND_API_KEY`, verify the sending domain, then add Supabase persistence so
-two people cannot take the same slot.
+- [ ] Calendly account, free plan
+- [ ] Connect the owner's real Google or Outlook calendar, so it cannot
+      double-book
+- [ ] One event type: 30 minutes, "Heirloom Scents consultation"
+- [ ] Attach Google Meet or Microsoft Teams so each booking gets its own link
+- [ ] Add the occasion question — wedding, graduation, other — and verify the
+      field type is allowed on the free plan
+- [ ] Brand colour `#b68235`
+- [ ] Confirm the owner gets the booking email, and the event lands on the
+      calendar with the link attached
+- [ ] `CalendlyEmbed` client component — inline embed, their script, lazy
+- [ ] Rewrite `sections/booking.tsx`: the artboard's night aside stays exactly
+      as drawn — mark, `h1`, the three numbered steps — and the right column
+      hosts the embed instead of the hand-built calendar
+- [ ] e2e: the embed loads on `/booking` at all four viewports, and the page
+      keeps one `h1` and no horizontal overflow
 
-**Either way, today:** make the confirmation stop claiming delivery. It says
-_"Two calendar invites have just been sent"_ when nothing is sent. One
-conditional on `hasEmailBackend` tells the truth now and restores the
-artboard's copy the moment a transport exists.
+### Delete — 1,374 lines and 5 dependencies
 
-- [ ] Confirmation copy conditional on whether delivery is wired
+Nothing below has a consumer once the embed lands. Verified by grep, not
+assumed.
+
+- [ ] `src/features/booking/` — all 12 files, 842 lines
+- [ ] `src/app/api/availability/route.ts` and `src/app/api/bookings/route.ts`
+- [ ] `src/lib/env.ts` — 43 lines. Its only exports are `hasBookingBackend` and
+      `hasEmailBackend`, and `store.ts` is their only consumer
+- [ ] `tests/unit/availability.test.ts`, `tests/unit/ics.test.ts`,
+      `tests/e2e/booking.spec.ts` — 400 lines
+- [ ] Dependencies: `@daypicker/react`, `date-fns`, `ics`, `react-hook-form`,
+      `@hookform/resolvers`. Each is used by the booking form alone. `zod`
+      stays — `content/site.ts` and `content/scents.ts` still validate with it
+- [ ] `Field` and `Select` from `primitives/field.tsx`. `Input` survives, used
+      by the newsletter form
+- [ ] `SITE.hostEmail` — existed only to fill the `.ics` organizer
+- [ ] `OCCASIONS` — becomes a question inside Calendly
+- [ ] From `BOOKING_COPY`, everything Calendly now owns: `submitLabel`,
+      `disclaimer`, `calendarNote`, `timeLabel`, `timeHintEmpty`,
+      `bookedSuffix`, `confirmHeading`, `confirmNote`, `inviteHeader`,
+      `inviteAttachment`, `backHome`, `bookAnother`. Keep `eyebrow`,
+      `asideHeading`, `asideBlurb`, `asideSteps`, `formHeading`
+- [ ] `docs/DEPLOYMENT.md` — the Supabase, Resend, Turnstile, soft-launch and
+      `.ics` timezone sections. Replace with the Calendly setup
+- [ ] `docs/DESIGN-PARITY.md` — the availability-mock, calendar-grid and
+      confirmation-copy rows, replaced with one row explaining the embed
+
+### Gate
+
+- [ ] `npm run verify` green, `knip` reporting zero unused files, exports or
+      dependencies
+- [ ] A real test booking arrives on the calendar with a working meeting link
+
+This closes the item that matters most: the live site currently takes enquiries
+and loses them.
 
 ## Phase 2 — The brand surface
 
-Cheap, visible on every visit and every share, and needs nothing from anyone.
+Cheap, visible on every visit and every share, needs nothing from anyone.
 
 - [ ] **Favicon and app icons** — there are none; every browser tab shows a
-      blank page icon. `app/icon.png` + `app/apple-icon.png` from `hs-mark.png`
+      blank page icon. `app/icon.png` and `app/apple-icon.png` from
+      `hs-mark.png`
 - [ ] **OG image** — links shared to Instagram or iMessage render with no
       picture, and `twitter:card` already claims `summary_large_image` with no
-      image. `app/opengraph-image.tsx`, or a static export of the hero
-- [ ] **Social icons** — Instagram and TikTok, Simple Icons, in the home
-      footer's contact column and the About contact block
-- [ ] **`/privacy` and `/terms`** — the content is written and sitting in
-      `~/Desktop/Business Infra/legal-pages-handoff/` (101 and 72 lines). Two
-      routes, two footer links, and the sitemap
-- [ ] Add both routes to `sitemap.ts` and the a11y/smoke specs
+      image behind it
+- [ ] **Social icons** — Instagram and TikTok from Simple Icons, since Lucide
+      dropped brand marks. In the home footer's contact column and the About
+      contact block
+- [ ] **`/privacy` and `/terms`** — content already written in
+      `~/Desktop/Business Infra/legal-pages-handoff/`. Two routes, two footer
+      links, both added to `sitemap.ts` and the a11y and smoke specs
 
-## Phase 3 — Finish what the design implies
+## Phase 3 — Shopify Basic, storefront in this app
 
-- [ ] **Newsletter backend.** The form validates and then says the list is not
-      open. Wire a provider, or remove the band
-- [ ] **Analytics.** None installed. Vercel Analytics is one line; anything
-      else needs a consent banner alongside the privacy page
-- [ ] **Founder block.** Ships as a labelled empty mat and "Founder name & bio
-      to come". Needs a portrait and two sentences
+$39/month, or $29 annual. Shopify Payments on, which also exempts PayPal from
+Shopify's third-party surcharge and brings Apple Pay, Google Pay and Shop Pay
+with it.
+
+### Shopify side
+
+- [ ] Shopify Basic account; Shopify Payments activated
+- [ ] Connect PayPal alongside it, so US buyers get Venmo
+- [ ] Products: the eight scents — price, weight, inventory, photos
+- [ ] **Shipping profile: ground only.** Alcohol-based perfume is a flammable
+      liquid. USPS ground only, 16 fl oz per parcel, hazard declared at label
+      purchase, Hazmat Label 876, surface-only marking, absorbent packing.
+      USPS Ground Advantage carries no hazmat handling fee; a mis-declared
+      parcel costs $50
+- [ ] Texas sales tax registration; Shopify Tax on
+- [ ] Refund, shipping and privacy policies published
+- [ ] Order notification email pointed at the owner; Shopify mobile app
+      installed for push
+- [ ] Brand the hosted checkout — logo, colours, fonts
+
+### This app
+
+- [ ] `@shopify/storefront-api-client`, tokens in Vercel env
+- [ ] `/shop` listing, product detail, and a cart — all in the existing design
+- [ ] Hand off to Shopify's hosted checkout. On Basic the checkout is on
+      `myshopify.com` or `shop.app` and cannot move to our domain; a custom
+      checkout domain is Plus only, at roughly $2,300/month. Accepted
+- [ ] `/shop` in the nav and the footers
+- [ ] e2e: listing renders, a product page renders, add-to-cart updates the
+      cart, and checkout hands off
+- [ ] Tracking needs no work — "Track with Shop" is on by default and gives
+      customers status, notifications and the live map
+
+## Phase 4 — Finish what the design implies
+
+- [ ] **Newsletter backend.** Today the form validates and then says the list
+      is not open. Wire a provider, or remove the band
+- [ ] **Analytics.** None installed
+- [ ] **Founder block.** A portrait and two sentences
 - [ ] **`--nav-h` vs the real mobile header.** The token is 79px; the header is
       155–176px on a phone because it wraps, so `/scents#golds` lands with part
       of the slide behind it. Measuring it at runtime would also change the
-      desktop slide height from the design's 821px — so this needs a deliberate
-      choice, not a quiet fix
+      desktop slide height from the design's 821px, so this needs a deliberate
+      choice
 - [ ] `NEXT_PUBLIC_SITE_URL` set in Vercel
 
-## Phase 4 — Take money at booking
+## Phase 5 — Deposits, only if wanted
 
-Only worth doing once Phase 1 is settled, because it attaches to the booking
-flow.
+The consultation is free, so this is for event retainers, not booking.
 
-- [ ] Decide whether a deposit is taken, and how much
-- [ ] Stripe account; decide Payment Link vs Checkout Session
-- [ ] If Calendly: use its native Stripe integration — no code
-- [ ] If custom: a Checkout Session from the booking route, with a webhook
-      confirming the booking only on `payment_intent.succeeded`
-- [ ] Refund and cancellation terms, in the terms page
-- [ ] Test-mode end-to-end before going live
-
-## Phase 5 — Products and orders
-
-**Gated.** Nothing here can start until three things exist, and none of them is
-code.
-
-- [ ] **A decision that retail is happening at all**, given the shipping
-      constraint above
-- [ ] **Pricing.** There is no price anywhere in the six artboards or the
-      codebase. Sizes, bundles, gift sets
-- [ ] **Design.** The project has no product listing, product detail, cart,
-      checkout, order confirmation or order status screen. These need drawing
-      before anything is ported
-
-Then, on Shopify Basic:
-
-- [ ] Shopify Basic store; catalogue from the eight house scents
-- [ ] Decide the surface: headless through this app (keeps the design) or a
-      themed store on `shop.heirloomscents.com` (days, replaceable later)
-- [ ] Shipping profiles reflecting the flammable-liquid restrictions
-- [ ] Tax registration for the nexus states
-- [ ] Order and fulfilment workflow the owner can run
-- [ ] Returns policy, published
-- [ ] If headless: `@shopify/storefront-api-client`, a listing page, a product
-      page and a cart in the existing design, handing off to Shopify checkout
-- [ ] Link it from the nav — the one change this site needs either way
+- [ ] Decide whether a retainer is taken, and how much
+- [ ] Calendly's native Stripe integration, or a Stripe invoice sent after the
+      consultation
+- [ ] Refund terms in the terms page
 
 ---
 
