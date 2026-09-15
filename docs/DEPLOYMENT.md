@@ -29,6 +29,52 @@ project holds no secrets.** `scripts/audit-bundle.mjs` keeps it that way: it
 fails the build if a client chunk references a known secret env var name or
 contains anything shaped like a live credential.
 
+## Content Security Policy
+
+`src/proxy.ts` sets a strict policy: `default-src 'self'`, no `'unsafe-eval'`
+in production, `frame-ancestors 'none'`, `object-src 'none'`.
+
+**The Calendly embed needs three exceptions, and gets exactly three.** They are
+added only when `NEXT_PUBLIC_CALENDLY_URL` is set, so an unconfigured deploy
+keeps the tighter policy:
+
+| Directive    | Added                         | For                                 |
+| ------------ | ----------------------------- | ----------------------------------- |
+| `script-src` | `https://assets.calendly.com` | the loader, `widget.js`             |
+| `style-src`  | `https://assets.calendly.com` | `widget.css`, which is not optional |
+| `frame-src`  | `https://calendly.com`        | the iframe the loader injects       |
+
+`connect-src` stays `'self'` and `default-src` stays `'self'`. **No
+`'unsafe-eval'`** — Calendly's community threads claim the embed requires it;
+the served `widget.js` contains no `eval(` and no `new Function(`, and the embed
+was verified working without it. The scheduling app runs inside the iframe under
+Calendly's own policy, not ours.
+
+`frame-src` governs what we may embed; `frame-ancestors 'none'` governs who may
+embed us, and is unchanged.
+
+`tests/e2e/booking.spec.ts` asserts all of this. It is the check that matters:
+the embed's markup renders whether or not the policy admits the script, so a
+test that only looks for the container passes while the widget is dead.
+
+### A pre-existing violation, and why it is harmless
+
+Every page reports one blocked `eval` from a Next.js chunk. It is **Zod 4**
+probing for `eval` so it can JIT-compile validators:
+
+```js
+try {
+  return (Function(""), true);
+} catch {
+  return false;
+}
+```
+
+The probe is wrapped in `try`/`catch`, so a blocked `eval` returns false and Zod
+falls back to its interpreted path. There are no uncaught errors on any route.
+The only cost is marginally slower validation. Do not add `'unsafe-eval'` to
+silence it.
+
 ## Booking
 
 Scheduling is **Calendly**, on its free plan, embedded inline in the booking

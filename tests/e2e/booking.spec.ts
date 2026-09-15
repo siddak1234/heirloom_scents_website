@@ -60,6 +60,48 @@ test.describe("booking", () => {
     await expect(page.locator(".hs-daypicker")).toHaveCount(0);
   });
 
+  /*
+   * The bug this catches, which the container assertion above could not: the
+   * site's CSP is `default-src 'self'` with `script-src 'self'`, which blocks
+   * Calendly's loader, its stylesheet and the iframe it injects. The embed
+   * markup renders regardless, so a test that only checks the div passes while
+   * the widget is dead. Assert the policy instead — it is deterministic and
+   * needs no third-party network.
+   */
+  test("the CSP admits Calendly, and only Calendly", async ({ request }) => {
+    const res = await request.get("/booking");
+    const csp = res.headers()["content-security-policy"] ?? "";
+    expect(csp, "a CSP must be served").not.toBe("");
+
+    const directive = (name: string) =>
+      csp
+        .split(";")
+        .map((d) => d.trim())
+        .find((d) => d.startsWith(`${name} `)) ?? "";
+
+    if (CALENDLY_URL) {
+      expect(directive("script-src"), "loader blocked").toContain("https://assets.calendly.com");
+      expect(directive("style-src"), "widget stylesheet blocked").toContain(
+        "https://assets.calendly.com",
+      );
+      expect(directive("frame-src"), "the scheduling iframe is blocked").toContain(
+        "https://calendly.com",
+      );
+      // Widened for the embed, not in general.
+      expect(directive("connect-src")).toBe("connect-src 'self'");
+      expect(directive("default-src")).toBe("default-src 'self'");
+    } else {
+      // Unconfigured: the tighter policy stands, and nothing may be framed.
+      expect(csp).not.toContain("calendly.com");
+      expect(directive("frame-src")).toBe("frame-src 'none'");
+    }
+
+    // Never, in either state.
+    expect(csp, "eval must stay blocked in production").not.toContain("'unsafe-eval'");
+    expect(directive("frame-ancestors"), "we must not be framable").toBe("frame-ancestors 'none'");
+    expect(directive("object-src")).toBe("object-src 'none'");
+  });
+
   test("the deleted booking API is gone", async ({ request }) => {
     for (const path of ["/api/bookings", "/api/availability"]) {
       const res = await request.get(path);
