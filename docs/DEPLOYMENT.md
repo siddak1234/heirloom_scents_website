@@ -95,7 +95,11 @@ ever wired, and none is needed now.
 
 ### Setting it up
 
-1. Calendly account, free plan.
+1. Calendly account, free plan. A **personal** Google or Microsoft account
+   is fine here — the calendar invite carries that address, and the account
+   can be moved to a domain mailbox later without losing bookings. No
+   custom-domain email is required for booking. See `docs/ROADMAP.md`
+   decision 3 for where one does become required.
 2. **Connect the owner's real Google or Outlook calendar.** This is the point of
    the exercise — it is what makes double-booking impossible.
 3. One event type: 30 minutes, "Heirloom Scents consultation".
@@ -122,6 +126,12 @@ the storefront rendered by this app through the Storefront API, and checkout
 handed off to Shopify's hosted checkout. On Basic the checkout cannot live on
 our own domain — a custom checkout domain is Plus only — and that trade is
 accepted.
+
+**Email identity is a prerequisite, not a detail.** Shopify rewrites the
+sender to `store+123@shopifyemail.com` unless `heirloomscents.com` is
+authenticated with its SPF, DKIM and DMARC records — DNS only, free, no
+mailbox. Pair that with Cloudflare Email Routing so replies to order email
+reach someone. `docs/ROADMAP.md` decision 3 has the full comparison.
 
 When it lands, the Shopify Storefront API token is public by design (it is
 scoped to read published products) and belongs in `NEXT_PUBLIC_`. An **Admin**
