@@ -1,8 +1,8 @@
 # Deployment
 
-The site is a standard Next.js 16 app and deploys to Vercel with no custom build
-configuration. It **builds and runs today with no environment variables set** —
-every one below is optional until the booking backend is wired.
+A standard Next.js 16 app on Vercel with no custom build configuration. Every
+route is statically prerendered; there are no route handlers and no server
+secrets.
 
 ```bash
 npm install
@@ -10,151 +10,130 @@ npm run verify   # typecheck → lint → format → unit → audits → build
 npm run dev
 ```
 
-## Vercel setup
+## Vercel
 
-1. Import the repository. Vercel detects Next.js; leave build and output settings
-   at their defaults. Turbopack is the default bundler in Next 16 — no flag needed.
-2. Set the Node version to 20.9 or later (the app declares `engines.node >= 20.9`).
-3. Add the environment variables below.
+1. Import the repository. Vercel detects Next.js; leave build and output
+   settings at their defaults. Turbopack is the default bundler in Next 16.
+2. Node 20.9 or later (the app declares `engines.node >= 20.9`).
+3. Set the environment variables below.
 
 ## Environment variables
 
-**No secret is committed to this repository.** `src/lib/env.ts` validates these at
-boot with zod, so a malformed value fails the deploy rather than the first booking.
+| Variable                   | Scope  | Environments        | Notes                                                                                                                                                                                                                               |
+| -------------------------- | ------ | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_CALENDLY_URL` | Public | Production, Preview | The consultation booking link, e.g. `https://calendly.com/heirloomscents/consultation`. Without it `/booking` renders an honest "being set up" panel pointing at Instagram rather than a form that takes a booking nobody receives. |
+| `NEXT_PUBLIC_SITE_URL`     | Public | Production, Preview | Canonical origin. Falls back to the value in `src/content/site.ts`.                                                                                                                                                                 |
 
-### Needed now
+Both are public by definition — a scheduling link and a canonical URL. **The
+project holds no secrets.** `scripts/audit-bundle.mjs` keeps it that way: it
+fails the build if a client chunk references a known secret env var name or
+contains anything shaped like a live credential.
 
-| Variable               | Scope  | Environments        | Notes                                                                                                           |
-| ---------------------- | ------ | ------------------- | --------------------------------------------------------------------------------------------------------------- |
-| `NEXT_PUBLIC_SITE_URL` | Public | Production, Preview | Canonical origin, e.g. `https://heirloomscents.com`. Falls back to the value in `src/content/site.ts` if unset. |
+## Content Security Policy
 
-## Soft launch: where bookings go today
+`src/proxy.ts` sets a strict policy: `default-src 'self'`, no `'unsafe-eval'`
+in production, `frame-ancestors 'none'`, `object-src 'none'`.
 
-**Nothing is persisted and no mail is sent.** `getAvailabilityStore()` returns
-`StaticAvailability`, whose `reserve()` hands back a random reference and stores
-nothing; `getNotifier()` returns `ConsoleNotifier`, which writes to the server
-log. The guest still sees "Your consultation is scheduled" and "Two calendar
-invites have just been sent", because that is what the artboard's confirmation
-screen says.
+**The Calendly embed needs three exceptions, and gets exactly three.** They are
+added only when `NEXT_PUBLIC_CALENDLY_URL` is set, so an unconfigured deploy
+keeps the tighter policy:
 
-So during a soft launch **the runtime log is the booking record**, and somebody
-has to read it.
+| Directive    | Added                         | For                                 |
+| ------------ | ----------------------------- | ----------------------------------- |
+| `script-src` | `https://assets.calendly.com` | the loader, `widget.js`             |
+| `style-src`  | `https://assets.calendly.com` | `widget.css`, which is not optional |
+| `frame-src`  | `https://calendly.com`        | the iframe the loader injects       |
 
-Each enquiry writes one WARN line carrying everything needed to honour it:
+`connect-src` stays `'self'` and `default-src` stays `'self'`. **No
+`'unsafe-eval'`** — Calendly's community threads claim the embed requires it;
+the served `widget.js` contains no `eval(` and no `new Function(`, and the embed
+was verified working without it. The scheduling app runs inside the iframe under
+Calendly's own policy, not ours.
 
-```
-[booking] NOT DELIVERED — no email backend configured, this log is the only record:
-{"reference":"HS-AB12CD","name":"…","email":"…","occasion":"Wedding","date":"2026-09-22","slot":"3:00 PM"}
-```
+`frame-src` governs what we may embed; `frame-ancestors 'none'` governs who may
+embed us, and is unchanged.
 
-Find them with either:
+`tests/e2e/booking.spec.ts` asserts all of this. It is the check that matters:
+the embed's markup renders whether or not the policy admits the script, so a
+test that only looks for the container passes while the widget is dead.
 
-```bash
-vercel logs <deployment-url> | grep '\[booking\]'
-```
+### A pre-existing violation, and why it is harmless
 
-or the project's **Logs** tab, filtered to `Warning` and searching `[booking]`.
+Every page reports one blocked `eval` from a Next.js chunk. It is **Zod 4**
+probing for `eval` so it can JIT-compile validators:
 
-Two things to know before relying on this:
-
-- **Vercel retains runtime logs for a limited window**, and the window depends on
-  the plan. An enquiry that is not read inside it is gone. Check the retention
-  figure for the current plan rather than assuming.
-- A guest has **no way to follow up**. There is no public contact address, so an
-  enquiry missed in the log is a lost booking with no second chance.
-
-Set `RESEND_API_KEY` and the enquiry is emailed instead; set `SUPABASE_*` and it
-is also stored. Both are one edit in `src/features/booking/lib/store.ts`.
-
-### Needed to turn the booking form into real bookings
-
-Until these are set, `/api/bookings` validates the request, enforces the trading
-rules, generates the `.ics`, and logs the two emails to the server console. The
-form, the calendar, and the confirmation screen are all fully working.
-
-| Variable                    | Scope      | Environments        | Purpose                                                                        |
-| --------------------------- | ---------- | ------------------- | ------------------------------------------------------------------------------ |
-| `SUPABASE_URL`              | **Secret** | Production, Preview | Project URL for booking persistence.                                           |
-| `SUPABASE_SERVICE_ROLE_KEY` | **Secret** | Production, Preview | Server-only key. Never expose to the browser — it bypasses RLS.                |
-| `RESEND_API_KEY`            | **Secret** | Production, Preview | Sends the guest and host confirmation emails.                                  |
-| `BOOKING_HOST_EMAIL`        | Plain      | Production, Preview | Where host notifications go. Defaults to the address in `src/content/site.ts`. |
-
-### Needed to enable bot protection
-
-| Variable                         | Scope      | Environments        | Purpose                                        |
-| -------------------------------- | ---------- | ------------------- | ---------------------------------------------- |
-| `TURNSTILE_SECRET_KEY`           | **Secret** | Production, Preview | Cloudflare Turnstile server-side verification. |
-| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | Public     | Production, Preview | Turnstile widget site key.                     |
-
-A honeypot field already ships and needs no configuration.
-
-## Wiring the remaining backends
-
-Everything routes through one seam: **`src/features/booking/lib/store.ts`**. No
-other file refers to a concrete backend.
-
-```ts
-export function getAvailabilityStore(): AvailabilityStore {
-  if (hasBookingBackend) {
-    // return new SupabaseAvailability(...)   ← the whole change
-  }
-  return new StaticAvailability();
+```js
+try {
+  return (Function(""), true);
+} catch {
+  return false;
 }
 ```
 
-### Supabase
+The probe is wrapped in `try`/`catch`, so a blocked `eval` returns false and Zod
+falls back to its interpreted path. There are no uncaught errors on any route.
+The only cost is marginally slower validation. Do not add `'unsafe-eval'` to
+silence it.
 
-Implement `AvailabilityStore` (`src/features/booking/lib/availability.ts`):
+## Booking
 
-- `takenSlotsForMonth(month)` → `{ "2026-09-15": ["3:00 PM"], … }`
-- `reserve({ date, slot, … })` → `{ ok: true, reference }` or `{ ok: false, reason: "taken" }`
+Scheduling is **Calendly**, on its free plan, embedded inline in the booking
+page's right column. The artboard's aside is unchanged.
 
-Suggested schema:
+### Why it is not ours
 
-```sql
-create table bookings (
-  id          uuid primary key default gen_random_uuid(),
-  reference   text not null unique,
-  name        text not null,
-  email       text not null,
-  occasion    text not null,
-  date        date not null,
-  slot        text not null,
-  created_at  timestamptz not null default now(),
-  -- Makes double-booking impossible at the database level rather than in app code.
-  unique (date, slot)
-);
-alter table bookings enable row level security;
--- No public policies: all access is via the service role from the route handler.
-```
+The site previously shipped a hand-built calendar, slot picker and availability
+layer. It had no connection to anyone's real calendar, so it would accept a
+3:00 PM consultation that was already committed elsewhere — and nothing in the
+codebase could know otherwise without integrating Google or Outlook, which is
+most of what a scheduling product is. Reminders, reschedule, cancellation,
+timezone and DST correctness and the meeting link all come with the scheduler.
 
-`reserve` must translate a unique-violation into `{ ok: false, reason: "taken" }`.
-The route handler already returns 409 for that case and the form already surfaces it.
+That removed roughly 1,370 lines and five dependencies, along with the Supabase,
+Resend and Turnstile integrations the old flow was waiting on. None of them was
+ever wired, and none is needed now.
 
-### Resend
+### Setting it up
 
-Implement `Notifier` (`src/features/booking/lib/notify.ts`). The message bodies and
-the `.ics` attachment are already built and unit-tested — only the transport is
-missing:
+1. Calendly account, free plan. A **personal** Google or Microsoft account
+   is fine here — the calendar invite carries that address, and the account
+   can be moved to a domain mailbox later without losing bookings. No
+   custom-domain email is required for booking. See `docs/ROADMAP.md`
+   decision 3 for where one does become required.
+2. **Connect the owner's real Google or Outlook calendar.** This is the point of
+   the exercise — it is what makes double-booking impossible.
+3. One event type: 30 minutes, "Heirloom Scents consultation".
+4. Attach Google Meet or Microsoft Teams. Video conferencing is free on every
+   Calendly plan, so each booking gets its own link.
+5. Add the occasion question — wedding, graduation, other — to the booking form.
+6. Brand colour `#b68235`.
+7. Copy the event link into `NEXT_PUBLIC_CALENDLY_URL` in Vercel and redeploy.
 
-```ts
-await resend.emails.send({
-  from: `Heirloom Scents <${BOOKING_HOST_EMAIL}>`,
-  to: details.email,
-  subject: "Your Heirloom Scents consultation",
-  text: guestEmailText(details),
-  attachments: [{ filename: "invite.ics", content: buildConsultationIcs(details) }],
-});
-```
+Reminders are a paid feature and are not configured. The consultation lands on
+the owner's calendar, which is where a reminder would come from anyway. No
+payment is taken: the consultation is free.
 
-Verify the sending domain in Resend before going live.
+### What happens on a booking
 
-## Known follow-up: calendar timezone
+Calendly writes the event straight into the connected calendar with the meeting
+link attached, and emails both the guest and the owner. There is no webhook to
+receive and nothing in this codebase runs.
 
-`buildConsultationIcs` emits **floating local time** on purpose. The library's
-default converts using the _server's_ clock, so on Vercel (UTC) a 3:00 PM slot
-would reach the guest's calendar as 10:00 AM Dallas. Floating time carries the
-wall-clock time the guest chose and is host-independent. A unit test guards this.
+## Commerce
 
-Once bookings are real, pin the event to `America/Chicago` with a proper
-VTIMEZONE block so daylight-saving transitions are unambiguous.
+Not built yet. `docs/ROADMAP.md` Phase 3 covers it: Shopify Basic as the engine,
+the storefront rendered by this app through the Storefront API, and checkout
+handed off to Shopify's hosted checkout. On Basic the checkout cannot live on
+our own domain — a custom checkout domain is Plus only — and that trade is
+accepted.
+
+**Email identity is a prerequisite, not a detail.** Shopify rewrites the
+sender to `store+123@shopifyemail.com` unless `heirloomscents.com` is
+authenticated with its SPF, DKIM and DMARC records — DNS only, free, no
+mailbox. Pair that with Cloudflare Email Routing so replies to order email
+reach someone. `docs/ROADMAP.md` decision 3 has the full comparison.
+
+When it lands, the Shopify Storefront API token is public by design (it is
+scoped to read published products) and belongs in `NEXT_PUBLIC_`. An **Admin**
+API token is not, and must never reach the client; the bundle audit already
+denylists its name and value shape.

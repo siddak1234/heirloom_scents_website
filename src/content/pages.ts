@@ -190,19 +190,11 @@ export const BOOKING_COPY = {
   asideBlurb: "Thirty minutes, video or phone. The details can wait for the call.",
   asideSteps: ["Invite sent instantly", "We plan it on the call", "Proposal within two days"],
   formHeading: "Reserve your consultation.",
-  submitLabel: "Reserve",
-  disclaimer:
-    "No commitment — the consultation is complimentary. A calendar invite goes to you and your Heirloom host.",
-  calendarNote: "Greyed days are fully booked or closed.",
-  timeLabel: "Time",
-  timeHintEmpty: "pick a day first",
-  bookedSuffix: "— booked",
-  confirmHeading: "Your consultation is scheduled.",
-  confirmNote: "Need a different time? Reply to the invite and we’ll move it.",
-  inviteHeader: "Calendar invite sent",
-  inviteAttachment: ".ics attached",
-  backHome: "Back to home",
-  bookAnother: "Book another",
+  /*
+   * Shown when NEXT_PUBLIC_CALENDLY_URL is unset. Calendly owns everything
+   * else the artboard drew here — the calendar, the slots, the Reserve button
+   * and the whole confirmation screen.
+   */
+  unconfigured:
+    "Our scheduling link is being set up. Message us and we will find a time for your consultation.",
 } as const;
-
-export const OCCASIONS = ["Wedding", "Bridal Shower", "Private Event", "Brand Experience"] as const;

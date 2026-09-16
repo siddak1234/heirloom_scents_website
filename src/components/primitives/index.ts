@@ -11,4 +11,4 @@ export { Plate, PlateFrame } from "./plate";
 export { NumberMark, pad2 } from "./number-mark";
 export { RoundButton } from "./round-button";
 export { Rule } from "./rule";
-export { Field, Input, Select } from "./field";
+export { Input } from "./field";
