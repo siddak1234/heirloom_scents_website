@@ -214,28 +214,36 @@
   }
 }
 
+/* One pane of the /scents deck.
+
+   The nav is sticky, so a pane can only ever occupy the viewport less --nav-h.
+   That is also the arithmetic scroll-padding-top uses, and the two must agree:
+   a pane taller than the snapport is an oversized snap target, and the spec
+   forbids snapping to a position that would leave part of it unreachable, so
+   the browser stops snapping through the middle of every pane. Desktop always
+   sized itself this way; the phone used a bare 100svh and was 79px over on
+   every slide, which is what made the deck snap only near the edges. */
+@utility deck-pane {
+  min-height: calc(100svh - var(--nav-h));
+}
+
 /* /scents turns the document itself into a snap deck, as its artboard does by
    setting scroll-snap-type on <html>. The class is toggled by the route.
 
-   Two strengths, for one reason. `mandatory` forces the resting position onto a
-   snap point, so a slide taller than the viewport has its tail permanently
-   unreachable — the browser pulls you back to the slide's start. Desktop slides
-   are a fixed height and can never overflow, so mandatory is safe and matches
-   the artboard. A phone slide has a floor, not a fixed height: it grows with
-   its copy, and at a large accessibility text size it can exceed the screen.
-   `proximity` snaps when a gesture ends near a slide edge and otherwise leaves
-   the scroll alone, so the deck still lands cleanly without ever stranding
-   text. */
-@media (width >= 861px) {
-  html.hs-snap {
-    scroll-snap-type: y mandatory;
-  }
+   `mandatory` is the only strictness that lands every gesture on a pane;
+   `proximity` is advisory and leaves a dead band mid-pane where a normal swipe
+   simply stops. It is safe here because a pane is sized to the snapport above.
+
+   A pane has a floor, not a fixed height, so at a large accessibility text size
+   its copy can still push it past the snapport. SnapScope watches for exactly
+   that and adds `hs-snap-relaxed`, which drops back to `proximity` rather than
+   strand the tail of a pane the reader cannot reach. */
+html.hs-snap {
+  scroll-snap-type: y mandatory;
 }
 
-@media (width < 861px) {
-  html.hs-snap {
-    scroll-snap-type: y proximity;
-  }
+html.hs-snap.hs-snap-relaxed {
+  scroll-snap-type: y proximity;
 }
 
 /* The home page's scent rail hides its scrollbar and pages with buttons

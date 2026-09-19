@@ -16,6 +16,32 @@ async function settle(page: Page) {
   await page.emulateMedia({ reducedMotion: "reduce" });
 }
 
+/**
+ * Waits until /scents has actually become a snap deck.
+ *
+ * SnapScope arms it from an effect, so before hydration the document is an
+ * ordinary scroll container. A snap is evaluated when a scroll ends, never
+ * retroactively — so a scroll that lands one frame early settles wherever it
+ * was dropped and no later class can pull it in. Under four parallel projects
+ * hydration is slow enough for that to happen, which is what made these
+ * assertions flaky; waiting is the fix, not a longer timeout.
+ */
+async function deckArmed(page: Page) {
+  await page.waitForFunction(() => document.documentElement.classList.contains("hs-snap"));
+}
+
+/**
+ * How close to a slide edge counts as landed, in pixels.
+ *
+ * Not sub-pixel: where exactly a snap comes to rest varies by a few pixels
+ * between runs — measured at 72–77px against a 79px scroll-padding on both this
+ * branch and main, so it is the browser's resolution, not the deck's. The bug
+ * these tests guard stranded the scroll *hundreds* of pixels from an edge, in
+ * the middle of a slide, so ten pixels separates landed from stranded with room
+ * to spare while asserting nothing the browser does not promise.
+ */
+const ON_EDGE = 10;
+
 test.describe("home — hero slideshow", () => {
   test("both slides' calls to action reach their route", async ({ page }) => {
     await page.goto("/");
@@ -225,16 +251,24 @@ test.describe("scent library", () => {
    * A slide shorter than the screen puts two scents on it at once. The floor
    * was a flat 560px, which is shorter than every phone viewport bar the SE —
    * a Pixel 7 showed 1.5 slides and nothing pulled them into place.
+   *
+   * The measure is the snapport, not the raw viewport: the nav is sticky, so a
+   * slide can only ever occupy the viewport less scroll-padding-top. Matching
+   * that exactly is what keeps the slide a snappable target — see the dead-zone
+   * test below.
    */
   test("one slide fills the screen, and its copy is never clipped", async ({ page, viewport }) => {
     await settle(page);
     await page.goto("/scents");
     const height = viewport?.height ?? 0;
+    const pad = await page.evaluate(
+      () => parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0,
+    );
 
     const slides = page.locator("[data-scent-slide]");
-    await expect(slides).toHaveCount(8);
+    await expect(slides).toHaveCount(SCENTS.length);
 
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < SCENTS.length; i++) {
       const slide = slides.nth(i);
       await slide.scrollIntoViewIfNeeded();
       const box = await slide.boundingBox();
@@ -243,8 +277,8 @@ test.describe("scent library", () => {
       if (height && (viewport?.width ?? 0) < DESK) {
         expect(
           box?.height ?? 0,
-          `slide ${String(i + 1)} is shorter than the screen`,
-        ).toBeGreaterThanOrEqual(height - 1);
+          `slide ${String(i + 1)} does not fill the screen below the nav`,
+        ).toBeGreaterThanOrEqual(height - pad - 1);
       }
       // The copy must fit whatever height the slide settled at.
       const clipped = await slide.evaluate((el) => {
@@ -256,46 +290,129 @@ test.describe("scent library", () => {
   });
 
   /*
+   * The bug this guards: a slide sized to the whole viewport is 79px taller
+   * than the snapport, which makes it an oversized snap target — the browser
+   * then refuses to snap through its middle, and the deck only caught near a
+   * slide edge. A normal swipe died in the dead band between. Release at every
+   * tenth of a slide; every one of them must settle on an edge.
+   */
+  test("a swipe released anywhere settles on a slide edge", async ({ page, viewport }) => {
+    test.skip((viewport?.width ?? 0) >= DESK, "the dead band was a phone-only bug");
+    await page.goto("/scents");
+    await deckArmed(page);
+
+    const pitch = await page.evaluate(() => {
+      const slides = document.querySelectorAll<HTMLElement>("[data-scent-slide]");
+      return slides[1] && slides[0]
+        ? slides[1].getBoundingClientRect().top - slides[0].getBoundingClientRect().top
+        : 0;
+    });
+
+    /*
+     * The dead band ran through the middle of a slide; the edges always caught.
+     * Five releases across it, rather than every tenth — the suite shares one
+     * server across four projects and each settle costs wall clock.
+     *
+     * The assertion is live: after the scroll ends, some slide's top must be
+     * sitting against the snapport edge. That is the property the bug broke,
+     * and reading it from the DOM avoids depending on a scroll offset computed
+     * before the sticky header finished settling.
+     */
+    for (const percent of [20, 35, 50, 65, 80]) {
+      await page.evaluate(
+        ([p, step]) => {
+          const pad = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
+          const slide = document.querySelectorAll<HTMLElement>("[data-scent-slide]")[2];
+          if (slide) {
+            const edge = slide.getBoundingClientRect().top + window.scrollY - pad;
+            window.scrollTo({ top: Math.round(edge + (step * p) / 100), behavior: "instant" });
+          }
+        },
+        [percent, pitch],
+      );
+
+      await expect
+        .poll(
+          async () =>
+            page.evaluate((tolerance) => {
+              const pad =
+                parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
+              return [...document.querySelectorAll<HTMLElement>("[data-scent-slide]")].some(
+                (s) => Math.abs(s.getBoundingClientRect().top - pad) <= tolerance,
+              );
+            }, ON_EDGE),
+          {
+            timeout: 8000,
+            message: `released ${String(percent)}% into the slide and never settled on an edge`,
+          },
+        )
+        .toBe(true);
+    }
+  });
+
+  test("the closing pane gives up its footer", async ({ page }) => {
+    await page.goto("/scents");
+    await deckArmed(page);
+    await page.evaluate(() => {
+      window.scrollTo({ top: document.body.scrollHeight, behavior: "instant" });
+    });
+    await expect
+      .poll(
+        async () =>
+          page.evaluate(() => {
+            const footer = document.querySelector("footer");
+            if (!footer) return false;
+            const rect = footer.getBoundingClientRect();
+            return rect.bottom <= window.innerHeight + 2 && rect.top < window.innerHeight;
+          }),
+        { timeout: 5000 },
+      )
+      .toBe(true);
+  });
+
+  /*
    * Deliberately not under reduced motion: globals.css releases the snap
    * entirely for `prefers-reduced-motion`, so emulating it here would assert
    * the opposite of what this test is for. The companion assertion is below.
    */
   test("the deck snaps to a slide edge", async ({ page }) => {
     await page.goto("/scents");
-    const tops = await page.evaluate(() =>
-      [...document.querySelectorAll("[data-scent-slide]")].map((s) =>
-        Math.round(s.getBoundingClientRect().top + window.scrollY),
-      ),
-    );
-    const pad = await page.evaluate(() =>
-      parseInt(getComputedStyle(document.documentElement).scrollPaddingTop, 10),
-    );
-    const third = tops[2] ?? 0;
+    await deckArmed(page);
 
-    // Land just short of a slide edge; the deck should settle on it. The snap
-    // target is the slide top less the scroll padding the sticky nav needs.
-    await page.evaluate(
-      (y) => {
-        window.scrollTo({ top: y, behavior: "instant" });
-      },
-      third - pad - 40,
-    );
-    //
-    // Within a pixel, not exactly: the announcement bar and the nav are not
-    // integer heights, so a slide's document top is fractional and rounding
-    // scrollY can land either side of it.
-    await expect
-      .poll(
-        async () =>
-          page.evaluate((expected) => Math.abs(window.scrollY - expected) <= 2, third - pad),
-        { timeout: 5000 },
-      )
-      .toBe(true);
+    /*
+     * Measured live, not against a scroll offset worked out beforehand. What
+     * has to hold is that the slide comes to rest against the snapport's top
+     * edge — scroll-padding-top below the sticky nav. Reading the slide's own
+     * rect at assert time states exactly that and survives the sub-pixel
+     * settling the sticky header does on first paint, which a precomputed
+     * scrollY integer does not.
+     */
+    const restsOnSlideThree = () =>
+      page.evaluate((tolerance) => {
+        const pad = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
+        const slide = document.querySelectorAll<HTMLElement>("[data-scent-slide]")[2];
+        return slide ? Math.abs(slide.getBoundingClientRect().top - pad) <= tolerance : false;
+      }, ON_EDGE);
+
+    // Land just short of the slide's edge; the deck should pull onto it.
+    await page.evaluate(() => {
+      const pad = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
+      const slide = document.querySelectorAll<HTMLElement>("[data-scent-slide]")[2];
+      if (slide) {
+        window.scrollTo({
+          top: slide.getBoundingClientRect().top + window.scrollY - pad - 40,
+          behavior: "instant",
+        });
+      }
+    });
+
+    await expect.poll(restsOnSlideThree, { timeout: 10_000 }).toBe(true);
   });
 
   test("reduced motion releases the snap, so nothing can trap the scroll", async ({ page }) => {
     await settle(page);
     await page.goto("/scents");
+    await deckArmed(page);
     await expect
       .poll(
         async () => page.evaluate(() => getComputedStyle(document.documentElement).scrollSnapType),

@@ -26,7 +26,7 @@ export function ScentSlide({
       {...(scent.anchor ? { id: scent.anchor } : {})}
       data-scent-slide=""
       aria-labelledby={headingId}
-      className="relative min-h-svh snap-start snap-always overflow-hidden text-cream desk:h-[calc(100vh-var(--nav-h))] desk:min-h-0"
+      className="relative deck-pane snap-start snap-always overflow-hidden text-cream desk:h-[calc(100vh-var(--nav-h))] desk:min-h-0"
     >
       <Image
         src={asset.src}
