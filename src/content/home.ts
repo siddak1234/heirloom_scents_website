@@ -111,7 +111,7 @@ export const VALUE_PROPS: readonly FeatureColumn[] = [
   },
   {
     title: "Made in our Dallas studio",
-    body: "Eight house scents of our own. Nothing resold, nothing off the shelf.",
+    body: "A growing library of house scents, all our own. Nothing resold, nothing off the shelf.",
   },
   {
     title: "Favors, labeled by hand",
@@ -122,7 +122,7 @@ export const VALUE_PROPS: readonly FeatureColumn[] = [
 export const HOME_COPY = {
   scentsEyebrow: "Explore Our",
   scentsHeading: "Scents",
-  scentsCta: "Explore All Scents",
+  scentsCta: "Explore the Scent Library",
   combinationsEyebrow: "Tried & Treasured",
   combinationsHeading: "Popular combinations",
   combinationsLink: "Read these scents",

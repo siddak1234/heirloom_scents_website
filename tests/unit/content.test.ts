@@ -6,9 +6,14 @@ import { EVENT_TYPES, EXPERIENCE_STEPS, INCLUDED, REELS } from "@/content/pages"
 import { IMAGES, VIDEOS } from "@/content/media-manifest";
 
 describe("scent library", () => {
-  it("has the eight scents in order", () => {
-    expect(SCENTS).toHaveLength(8);
-    expect(SCENTS.map((s) => s.index)).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
+  /*
+   * Deliberately not a fixed count. The library is a showcase, not a closed
+   * catalogue, so adding a scent must not fail the suite — what has to hold is
+   * that every "No. NN" mark matches the slide's actual place in the deck.
+   */
+  it("numbers every scent by its position in the deck", () => {
+    expect(SCENTS.length).toBeGreaterThan(0);
+    expect(SCENTS.map((s) => s.index)).toEqual(SCENTS.map((_, i) => i + 1));
   });
 
   it("uses unique slugs", () => {

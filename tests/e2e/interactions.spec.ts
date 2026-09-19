@@ -1,5 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 
+import { SCENTS } from "@/content/scents";
+
 /**
  * The button-by-button sweep: every control the artboards draw, asserted to do
  * what the artboard says it does, at all four viewports.
@@ -68,12 +70,12 @@ test.describe("home — hero slideshow", () => {
 });
 
 test.describe("home — scent rail", () => {
-  test("all eight cards link into the scent library", async ({ page }) => {
+  test("every card links into the scent library", async ({ page }) => {
     await settle(page);
     await page.goto("/");
-    const rail = page.getByRole("list", { name: "The eight house scents" });
+    const rail = page.getByRole("list", { name: "The house scent library" });
     const cards = rail.getByRole("link");
-    await expect(cards).toHaveCount(8);
+    await expect(cards).toHaveCount(SCENTS.length);
     for (const href of await cards.evaluateAll((els) => els.map((e) => e.getAttribute("href")))) {
       expect(href).toBe("/scents");
     }
@@ -83,7 +85,7 @@ test.describe("home — scent rail", () => {
     test.skip((viewport?.width ?? 0) < DESK, "the rail needs room to page");
     await settle(page);
     await page.goto("/");
-    const rail = page.getByRole("list", { name: "The eight house scents" });
+    const rail = page.getByRole("list", { name: "The house scent library" });
     const left = () => rail.evaluate((el) => el.scrollLeft);
 
     expect(await left()).toBe(0);
@@ -120,10 +122,10 @@ test.describe("home — the rest of the page", () => {
     await expect(page).toHaveURL(/\/about$/);
   });
 
-  test('"Explore All Scents" reaches the library', async ({ page }) => {
+  test('"Explore the Scent Library" reaches the library', async ({ page }) => {
     await settle(page);
     await page.goto("/");
-    await page.getByRole("link", { name: "Explore All Scents" }).click();
+    await page.getByRole("link", { name: "Explore the Scent Library" }).click();
     await expect(page).toHaveURL(/\/scents$/);
   });
 
@@ -176,24 +178,14 @@ test.describe("home — the rest of the page", () => {
 });
 
 test.describe("scent library", () => {
-  test("all eight slides render with their pairings", async ({ page }) => {
+  test("every slide renders with its pairings", async ({ page }) => {
     await settle(page);
     await page.goto("/scents");
-    const names = [
-      "Saffron Amber",
-      "Golden Vanilla",
-      "Midnight Vanilla",
-      "Velvet Coffee",
-      "Citrus Rose",
-      "Ivory Petals",
-      "Berry Cloud",
-      "Velvet Lychee Rose",
-    ];
-    for (const name of names) {
-      const slide = page.locator("[data-scent-slide]").filter({ hasText: name }).first();
+    for (const scent of SCENTS) {
+      const slide = page.locator("[data-scent-slide]").filter({ hasText: scent.name }).first();
       await expect(slide).toContainText("Best paired with");
     }
-    await expect(page.locator("[data-scent-slide]")).toHaveCount(8);
+    await expect(page.locator("[data-scent-slide]")).toHaveCount(SCENTS.length);
   });
 
   test("the index rail hides at the hero, then tracks and jumps", async ({ page, viewport }) => {
@@ -334,7 +326,7 @@ test.describe("experience", () => {
   test("only step one links, and it reaches the library", async ({ page }) => {
     await settle(page);
     await page.goto("/experience");
-    const link = page.getByRole("link", { name: /Meet the eight scents/ });
+    const link = page.getByRole("link", { name: /Meet our signature scents/ });
     await expect(link).toHaveCount(1);
     await link.click();
     await expect(page).toHaveURL(/\/scents$/);

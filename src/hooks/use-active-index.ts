@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
  * Tracks which slide currently owns the viewport centre.
  *
  * The artboard did this with a scroll listener that called getBoundingClientRect()
- * on all eight slides every frame. An IntersectionObserver gives identical
+ * on every slide every frame. An IntersectionObserver gives identical
  * behaviour and does the work off the main thread.
  */
 export function useActiveIndex(selector: string, count: number): number {

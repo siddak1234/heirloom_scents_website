@@ -282,6 +282,13 @@ rgba(22,18,14,0.82) 85%)`. Contents stagger in on `hsFadeUp` at
    and a scroll cue — `9px`/`0.3em` "Scroll to meet them" over a `1px × 42px`
    accent bar animating `hsCue` `2.6s cubic-bezier(0.45,0,0.55,1)` infinite.
 
+> **Superseded, on the count only.** This section records the artboard, which
+> drew exactly eight slides and copy that named the number. The scents are a
+> showcase, not a closed catalogue, so the count is no longer fixed anywhere in
+> code or copy: `SCENTS` sets the length, and the copy says "signature" instead
+> of "eight". Step One's link now reads "Meet our signature scents" and home's
+> CTA "Explore the Scent Library". Everything else below still holds.
+
 2. **Eight scent slides**, `No. 01`–`No. 08` in the order Saffron Amber, Golden
    Vanilla, Midnight Vanilla, Velvet Coffee, Citrus Rose, Ivory Petals, Berry
    Cloud, Velvet Lychee Rose. Each: the bottle photograph full-bleed at

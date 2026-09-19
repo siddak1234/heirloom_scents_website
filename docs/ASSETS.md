@@ -5,7 +5,7 @@ Every asset is the real thing. There are no placeholders.
 | Group                   | Count | Source                                            |
 | ----------------------- | ----- | ------------------------------------------------- |
 | `public/images/brand/`  | 7     | `hs-mark.png` + the six `brand-*.jpg` photographs |
-| `public/images/scents/` | 9     | the eight `bottle-*` and `bg-scents-hero.png`     |
+| `public/images/scents/` | 9     | the `bottle-*` files and `bg-scents-hero.png`     |
 | `public/images/photos/` | 6     | the `photo-*` studio renders                      |
 | `public/video/`         | 4 + 4 | `reel-1…4.mp4` and a poster frame for each        |
 
