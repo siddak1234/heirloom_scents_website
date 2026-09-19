@@ -3,8 +3,12 @@ import { IMAGES, type ImageKey } from "./media-manifest";
 
 const scentSchema = z.object({
   slug: z.string(),
-  /** 1-based position; rendered zero-padded as "No. 01". */
-  index: z.number().int().min(1).max(8),
+  /**
+   * 1-based position; rendered zero-padded as "No. 01". Must match the scent's
+   * place in SCENTS — the unit suite enforces that, so the marks stay in step
+   * when a scent is added, removed or reordered.
+   */
+  index: z.number().int().min(1),
   name: z.string(),
   /** The full provenance line on the scent's own slide. */
   origin: z.string(),
@@ -25,9 +29,15 @@ const scentSchema = z.object({
 
 export type Scent = z.infer<typeof scentSchema>;
 
+/*
+ * The signature scents the cart showcases — not a closed catalogue. The house
+ * library runs deeper and grows, so nothing here caps the count: add a scent by
+ * appending it with the next `index`, and the slides, the home rail and the
+ * index rail all follow.
+ */
 export const SCENTS: readonly Scent[] = z
   .array(scentSchema)
-  .length(8)
+  .min(1)
   .parse([
     {
       slug: "saffron-amber",
@@ -134,7 +144,7 @@ export const SCENT_NAMES: readonly string[] = SCENTS.map((scent) => scent.name);
 
 /**
  * The slide gradient, built from the scent's own base. The four stops are
- * identical on all eight slides; only the colour changes.
+ * identical on every slide; only the colour changes.
  */
 export function slideGradient(overlay: string): string {
   return (

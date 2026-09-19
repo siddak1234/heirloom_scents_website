@@ -212,7 +212,7 @@ with it.
 
 - [ ] Shopify Basic account; Shopify Payments activated
 - [ ] Connect PayPal alongside it, so US buyers get Venmo
-- [ ] Products: the eight scents — price, weight, inventory, photos
+- [ ] Products: the scent library — price, weight, inventory, photos
 - [ ] **Shipping profile: ground only.** Alcohol-based perfume is a flammable
       liquid. USPS ground only, 16 fl oz per parcel, hazard declared at label
       purchase, Hazmat Label 876, surface-only marking, absorbent packing.

@@ -6,7 +6,7 @@ import { CardRail } from "@/components/patterns/card-rail";
 import { HOME_COPY } from "@/content/home";
 import { SCENTS } from "@/content/scents";
 
-/** "Explore Our Scents" — all eight, in a paged snap rail. */
+/** "Explore Our Scents" — the signature scents, in a paged snap rail. */
 export function HomeScentRow() {
   return (
     <Section className="pt-25 pb-22.5">
@@ -16,7 +16,7 @@ export function HomeScentRow() {
       </Reveal>
 
       <CardRail
-        label="The eight house scents"
+        label="The house scent library"
         backLabel="Scroll scents back"
         forwardLabel="Scroll scents forward"
       >

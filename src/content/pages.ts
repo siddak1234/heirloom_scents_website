@@ -19,10 +19,10 @@ export const EXPERIENCE_STEPS: readonly ExperienceStep[] = [
     no: 1,
     eyebrow: "Step One",
     title: "Choose your favorite fragrances",
-    body: "Guests smell their way down the tower, eight house scents, each poured over a labeled glass. No wrong answers: they simply mark the two or three they keep returning to.",
+    body: "Guests smell their way down the tower, each house scent poured over a labeled glass. No wrong answers: they simply mark the two or three they keep returning to.",
     image: "photo-step1-choose",
     imageAlt: "Choosing fragrances at the cart",
-    link: { href: "/scents", label: "Meet the eight scents" },
+    link: { href: "/scents", label: "Meet our signature scents" },
   },
   {
     no: 2,
@@ -56,7 +56,7 @@ export const INCLUDED: readonly FeatureColumn[] = [
     body: "Gold‑capped and named for your date.",
   },
   {
-    title: "The menu of eight house scents",
+    title: "The full menu of house scents",
     body: "Made in‑house in Dallas, never resold.",
   },
 ];
@@ -65,7 +65,7 @@ export const EXPERIENCE_COPY = {
   eyebrow: "The Heirloom Experience",
   heading: "Your guests become the perfumer.",
   blurb:
-    "The Heirloom cart arrives styled to your event. A perfume specialist welcomes each guest and guides them as they compose a fragrance of their own from our eight house scents, then it leaves poured, labeled and boxed to take home.",
+    "The Heirloom cart arrives styled to your event. A perfume specialist welcomes each guest and guides them as they compose a fragrance of their own from our house scent library, then it leaves poured, labeled and boxed to take home.",
   interludeHeading: "Made by their hands. Worn for years.",
   includedEyebrow: "Every booking includes",
   ctaHeading: "Give your guests something to keep.",
@@ -123,7 +123,7 @@ export const EVENTS_COPY = {
   celebrateEyebrow: "Elegance",
   celebrateHeading: "Celebrate with scent.",
   celebrateBody:
-    "Heirloom brings the luxury of fragrance to your event with our mobile perfume bar. Guests enjoy a hands on experience as a perfume specialist guides them through our eight house scents to craft a fragrance of their own. Each bottle is poured, personalized and ready to take home as a one of a kind gift. With custom labels, gift bags and cart signage, Heirloom adds a personal and elegant touch to weddings, showers, corporate events and more.",
+    "Heirloom brings the luxury of fragrance to your event with our mobile perfume bar. Guests enjoy a hands on experience as a perfume specialist guides them through our house scent library to craft a fragrance of their own. Each bottle is poured, personalized and ready to take home as a one of a kind gift. With custom labels, gift bags and cart signage, Heirloom adds a personal and elegant touch to weddings, showers, corporate events and more.",
   celebrateCta: "Book Now",
   typeCardLink: "Book this",
   filmEyebrow: "The Bar, In Motion",
@@ -136,7 +136,7 @@ export const EVENTS_COPY = {
 export const ABOUT_COPY = {
   heading: "A Dallas house of memory.",
   body1:
-    "Heirloom Scents began with a simple observation: of everything a guest carries home from a wedding, scent is the only thing that carries them back. We compose our own fragrances, eight house scents, made in our Dallas studio, never resold from another vendor’s shelf, and we bring them to celebrations on a cart built for lingering.",
+    "Heirloom Scents began with a simple observation: of everything a guest carries home from a wedding, scent is the only thing that carries them back. We compose our own fragrances, a house library that keeps growing, made in our Dallas studio, never resold from another vendor’s shelf, and we bring them to celebrations on a cart built for lingering.",
   body2:
     "The name is the promise. An heirloom is something made once, kept long, and passed on with a story attached. Every bottle that leaves our bar is exactly that, a memory, bottled.",
   founderEyebrow: "The Founder",
@@ -174,10 +174,11 @@ export const SCENTS_COPY = {
   eyebrow: "The Scent Library",
   heading: "Our Scents",
   blurb:
-    "Eight fragrances, composed in our Dallas studio and poured at the cart. Every blend your guests create begins here.",
+    "Our signature fragrances, composed in our Dallas studio and poured at the cart. The library runs deeper, and every blend your guests create begins here.",
   scrollCue: "Scroll to meet them",
   closeHeading: "Reading is one thing. Smelling is another.",
-  closeBlurb: "All eight travel with the cart to every event.",
+  closeBlurb:
+    "Every scent here travels with the cart, along with the rest of the library and anything we compose for you.",
   closeCta: "Book an Event",
   pairedWith: "Best paired with",
 } as const;

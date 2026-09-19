@@ -38,7 +38,7 @@ test("every internal link resolves", async ({ page, request }) => {
   }
 });
 
-// The artboard puts an id on two of the eight slides. Nothing in the site links
+// The artboard puts an id on two of the scent slides. Nothing in the site links
 // to them any more, but they are stable deep-link targets and are kept.
 test("the two scent anchors the artboard names still land", async ({ page }) => {
   await page.goto("/scents#florals");
