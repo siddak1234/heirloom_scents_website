@@ -1,32 +1,28 @@
-"use client";
-
-import { useState } from "react";
 import Image from "next/image";
 import { DarkBand, SiteFooterBooking } from "@/components/layout";
-import { Eyebrow, Mark, NumberMark } from "@/components/primitives";
-import { BookingForm } from "@/features/booking/components/booking-form";
-import { Confirmation } from "@/features/booking/components/confirmation";
-import type { BookingResult } from "@/features/booking/schema";
+import { CalendlyEmbed } from "@/components/patterns/calendly-embed";
+import { ArrowLink, Eyebrow, Mark, NumberMark } from "@/components/primitives";
 import { image } from "@/content/media-manifest";
 import { BOOKING_COPY } from "@/content/pages";
+import { SITE } from "@/content/site";
 
+/** Set in Vercel; a public scheduling link, not a secret. */
+const CALENDLY_URL = process.env.NEXT_PUBLIC_CALENDLY_URL;
+
+/**
+ * The booking screen. The artboard's aside is unchanged — night ground, the
+ * mark, the heading, the three numbered steps. The right column, which used to
+ * hold a hand-built calendar and slot picker, is now Calendly's inline embed.
+ *
+ * Why the calendar is not ours: the hand-built version had no connection to
+ * anyone's real calendar, so it would take a slot that was already committed.
+ * Reminders, reschedule, cancellation, timezone correctness and the meeting
+ * link all come with the scheduler. See docs/DESIGN-PARITY.md.
+ *
+ * This is a server component. Only the embed itself is client-side.
+ */
 export function BookingScreen() {
-  const [result, setResult] = useState<BookingResult | null>(null);
   const aside = image("photo-artist-pour");
-
-  if (result) {
-    return (
-      <>
-        <Confirmation
-          result={result}
-          onReset={() => {
-            setResult(null);
-          }}
-        />
-        <SiteFooterBooking />
-      </>
-    );
-  }
 
   return (
     <>
@@ -73,13 +69,30 @@ export function BookingScreen() {
           </div>
         </DarkBand>
 
-        <div className="flex max-w-narrow flex-col justify-center px-6 py-16 desk:px-18 desk:py-16">
+        <div className="flex flex-col justify-center px-6 py-16 desk:px-18">
           <Eyebrow>{BOOKING_COPY.eyebrow}</Eyebrow>
           <h2 className="mt-3.5 font-heading text-heading-md leading-[1.06] font-normal desk:text-title-xl">
             {BOOKING_COPY.formHeading}
           </h2>
           <div className="mt-9">
-            <BookingForm onBooked={setResult} />
+            {CALENDLY_URL ? (
+              <CalendlyEmbed url={CALENDLY_URL} />
+            ) : (
+              /*
+               * No scheduling link configured. Say so and give a route that
+               * works — an empty box, or a form that accepts a booking and
+               * drops it, is worse than an honest message.
+               */
+              <div className="border border-divider px-8 py-10">
+                <p className="text-body-md/[1.8] text-ink/78">{BOOKING_COPY.unconfigured}</p>
+                <ArrowLink
+                  href={`https://www.instagram.com/${SITE.instagram.replace("@", "")}`}
+                  className="mt-6"
+                >
+                  {`Message us on Instagram`}
+                </ArrowLink>
+              </div>
+            )}
           </div>
         </div>
       </div>

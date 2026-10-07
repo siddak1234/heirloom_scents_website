@@ -18,16 +18,46 @@ const SCRIPT_SRC =
     ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
     : "script-src 'self' 'unsafe-inline'";
 
+/*
+ * Calendly's inline embed needs three origins, and only these three:
+ *
+ *   assets.calendly.com  the loader script and its stylesheet
+ *   calendly.com         the iframe the loader injects
+ *
+ * It does NOT need 'unsafe-eval', despite what Calendly's own community
+ * threads claim. widget.js contains no `eval(` and no `new Function(` — the
+ * scheduling app runs inside the iframe, under Calendly's own policy, not ours.
+ * Verified against the served file rather than taken on trust.
+ *
+ * These are added only when a scheduling link is configured, so a deploy
+ * without one keeps the tighter policy.
+ */
+const CALENDLY_ASSETS = "https://assets.calendly.com";
+const CALENDLY_FRAME = "https://calendly.com";
+const CALENDLY_ENABLED = Boolean(process.env.NEXT_PUBLIC_CALENDLY_URL);
+
+const scriptSrc = CALENDLY_ENABLED ? `${SCRIPT_SRC} ${CALENDLY_ASSETS}` : SCRIPT_SRC;
+const styleSrc = CALENDLY_ENABLED
+  ? `style-src 'self' 'unsafe-inline' ${CALENDLY_ASSETS}`
+  : "style-src 'self' 'unsafe-inline'";
+
 const BASE_DIRECTIVES = [
   "default-src 'self'",
   // Next injects inline bootstrap scripts; 'unsafe-inline' is required for them.
-  SCRIPT_SRC,
+  scriptSrc,
   // Tailwind and next/font emit inline style attributes.
-  "style-src 'self' 'unsafe-inline'",
+  styleSrc,
   "img-src 'self' data: blob:",
   "font-src 'self' data:",
   "connect-src 'self'",
   "form-action 'self'",
+  /*
+   * frame-src governs what WE may embed. Without it, frames fall back to
+   * default-src 'self' and Calendly's iframe is blocked. Note this is the
+   * opposite direction from frame-ancestors below, which governs who may
+   * embed us and stays at 'none'.
+   */
+  ...(CALENDLY_ENABLED ? [`frame-src ${CALENDLY_FRAME}`] : ["frame-src 'none'"]),
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "object-src 'none'",

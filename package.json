@@ -26,17 +26,12 @@
     "media:manifest": "node scripts/build-media-manifest.mjs && prettier --write src/content/media-manifest.ts"
   },
   "dependencies": {
-    "@daypicker/react": "^10.0.1",
-    "@hookform/resolvers": "^5.9.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "date-fns": "^4.4.0",
-    "ics": "^3.12.0",
     "lucide-react": "^1.46.0",
     "next": "16.3.1",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "react-hook-form": "^7.85.0",
     "tailwind-merge": "^3.6.0",
     "zod": "^4.4.3"
   },

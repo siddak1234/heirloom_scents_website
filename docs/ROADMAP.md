@@ -9,7 +9,7 @@ covers environment and backends.
 
 ---
 
-## The three decisions to make first
+## The decisions each phase depends on
 
 ### 1. Booking: Calendly, free plan — DECIDED
 
@@ -110,7 +110,56 @@ can be replaced by the headless version later without changing Shopify.
 > strongest argument for Shopify, whose shipping profiles and carrier apps are
 > built for exactly this kind of restriction.
 
-### 3. Social icons need a brand-icon set
+### 3. Email identity — one decision, three phases depend on it
+
+There is no business mailbox today. `hello@heirloomscents.com` was removed from
+the site because it does not exist. What each phase actually needs differs, and
+conflating them buys a subscription nothing needs yet:
+
+| Phase            | What it needs                                               | Is a personal Gmail enough?         |
+| ---------------- | ----------------------------------------------------------- | ----------------------------------- |
+| 1 — Calendly     | An account with a real calendar                             | **Yes.** Invites carry that address |
+| 3 — Shopify      | DNS control, domain authentication, a sender that can reply | **No** — see below                  |
+| 4 — Site contact | An address that receives mail                               | No; the site shows none today       |
+
+**Phase 3 is what forces the decision.** Since February 2024 Gmail and Yahoo
+require an authenticated sending domain with a DMARC record. Shopify documents
+the consequence plainly: without authentication **it rewrites the sender to
+`store+123@shopifyemail.com`**, so mail still arrives. Order confirmations,
+shipping notices and tracking emails would all carry that From address.
+
+Two facts, routinely confused:
+
+1. **Domain authentication needs DNS records, not a mailbox.** Add Shopify's
+   CNAMEs for SPF, DKIM and DMARC to `heirloomscents.com`. No subscription, no
+   inbox. We control the DNS, so it costs nothing whenever Phase 3 starts.
+2. **The sender address should still receive**, because customers reply to
+   order email. That is the one job **Cloudflare Email Routing** does, free:
+   forward `hello@heirloomscents.com` to any existing inbox, no card. It is
+   **receive-only** — replies leave from the forwarding inbox's own address —
+   and Gmail's "Send mail as" workaround for non-Google addresses is **being
+   removed in January 2027**, so do not build on that half of it.
+
+| Option                                | Receives at the domain | Sends from the domain | Cost                                 |
+| ------------------------------------- | ---------------------- | --------------------- | ------------------------------------ |
+| Personal Gmail only                   | No                     | No                    | $0                                   |
+| **+ Cloudflare Email Routing**        | **Yes**                | No                    | **$0**                               |
+| **Google Workspace Business Starter** | **Yes**                | **Yes**               | **$7/user/mo annual, $8.40 monthly** |
+
+**A sequence, not a single purchase:**
+
+- **Now, for Phase 1:** a personal Google or Microsoft account. It works today,
+  and moving Calendly onto a Workspace account later is a calendar reconnect
+  that keeps existing bookings. Do not block the booking fix on a mailbox.
+- **Before Phase 3 launches:** authenticate `heirloomscents.com` in Shopify
+  (DNS only, free) **and** add Cloudflare Email Routing for `hello@` so replies
+  land somewhere. Together those remove `shopifyemail.com` from every customer
+  email at zero cost.
+- **When replying as the brand matters:** Google Workspace. It is the only
+  option that sends from the domain, and it is also what lets the contact
+  address return to `/about` and the footer in Phase 4.
+
+### 4. Social icons need a brand-icon set
 
 Lucide **removed its brand icons** — `Instagram`, `Facebook`, `Twitter` and
 `Youtube` are all absent from its 6,299 exports, and TikTok never existed there.
@@ -129,9 +178,11 @@ The custom booking flow is replaced, not extended. Everything it needed —
 Supabase, Resend, Turnstile, `.ics` generation, availability rules, the
 honeypot — goes with it. Calendly owns all of that now.
 
-### Build
+### Build — code done, account pending
 
-- [ ] Calendly account, free plan
+- [ ] Calendly account, free plan. A **personal** Google or Microsoft
+      account is fine — invites carry that address, and it can move to a
+      domain account later. See decision 3; do not block on a mailbox
 - [ ] Connect the owner's real Google or Outlook calendar, so it cannot
       double-book
 - [ ] One event type: 30 minutes, "Heirloom Scents consultation"
@@ -141,39 +192,39 @@ honeypot — goes with it. Calendly owns all of that now.
 - [ ] Brand colour `#b68235`
 - [ ] Confirm the owner gets the booking email, and the event lands on the
       calendar with the link attached
-- [ ] `CalendlyEmbed` client component — inline embed, their script, lazy
-- [ ] Rewrite `sections/booking.tsx`: the artboard's night aside stays exactly
+- [x] `CalendlyEmbed` client component — inline embed, their script, lazy
+- [x] Rewrite `sections/booking.tsx`: the artboard's night aside stays exactly
       as drawn — mark, `h1`, the three numbered steps — and the right column
       hosts the embed instead of the hand-built calendar
-- [ ] e2e: the embed loads on `/booking` at all four viewports, and the page
+- [x] e2e: the embed loads on `/booking` at all four viewports, and the page
       keeps one `h1` and no horizontal overflow
 
-### Delete — 1,374 lines and 5 dependencies
+### Delete — done: 1,374 lines and 5 dependencies
 
 Nothing below has a consumer once the embed lands. Verified by grep, not
 assumed.
 
-- [ ] `src/features/booking/` — all 12 files, 842 lines
-- [ ] `src/app/api/availability/route.ts` and `src/app/api/bookings/route.ts`
-- [ ] `src/lib/env.ts` — 43 lines. Its only exports are `hasBookingBackend` and
+- [x] `src/features/booking/` — all 12 files, 842 lines
+- [x] `src/app/api/availability/route.ts` and `src/app/api/bookings/route.ts`
+- [x] `src/lib/env.ts` — 43 lines. Its only exports are `hasBookingBackend` and
       `hasEmailBackend`, and `store.ts` is their only consumer
-- [ ] `tests/unit/availability.test.ts`, `tests/unit/ics.test.ts`,
+- [x] `tests/unit/availability.test.ts`, `tests/unit/ics.test.ts`,
       `tests/e2e/booking.spec.ts` — 400 lines
-- [ ] Dependencies: `@daypicker/react`, `date-fns`, `ics`, `react-hook-form`,
+- [x] Dependencies: `@daypicker/react`, `date-fns`, `ics`, `react-hook-form`,
       `@hookform/resolvers`. Each is used by the booking form alone. `zod`
       stays — `content/site.ts` and `content/scents.ts` still validate with it
-- [ ] `Field` and `Select` from `primitives/field.tsx`. `Input` survives, used
+- [x] `Field` and `Select` from `primitives/field.tsx`. `Input` survives, used
       by the newsletter form
-- [ ] `SITE.hostEmail` — existed only to fill the `.ics` organizer
-- [ ] `OCCASIONS` — becomes a question inside Calendly
-- [ ] From `BOOKING_COPY`, everything Calendly now owns: `submitLabel`,
+- [x] `SITE.hostEmail` — existed only to fill the `.ics` organizer
+- [x] `OCCASIONS` — becomes a question inside Calendly
+- [x] From `BOOKING_COPY`, everything Calendly now owns: `submitLabel`,
       `disclaimer`, `calendarNote`, `timeLabel`, `timeHintEmpty`,
       `bookedSuffix`, `confirmHeading`, `confirmNote`, `inviteHeader`,
       `inviteAttachment`, `backHome`, `bookAnother`. Keep `eyebrow`,
       `asideHeading`, `asideBlurb`, `asideSteps`, `formHeading`
-- [ ] `docs/DEPLOYMENT.md` — the Supabase, Resend, Turnstile, soft-launch and
+- [x] `docs/DEPLOYMENT.md` — the Supabase, Resend, Turnstile, soft-launch and
       `.ics` timezone sections. Replace with the Calendly setup
-- [ ] `docs/DESIGN-PARITY.md` — the availability-mock, calendar-grid and
+- [x] `docs/DESIGN-PARITY.md` — the availability-mock, calendar-grid and
       confirmation-copy rows, replaced with one row explaining the embed
 
 ### Gate
@@ -220,6 +271,14 @@ with it.
       parcel costs $50
 - [ ] Texas sales tax registration; Shopify Tax on
 - [ ] Refund, shipping and privacy policies published
+- [ ] **Authenticate `heirloomscents.com` in Shopify** — its CNAME records
+      for SPF, DKIM and DMARC. Free, DNS only, no mailbox required. Skip
+      it and every order confirmation, shipping notice and tracking email
+      goes out as `store+123@shopifyemail.com`
+- [ ] **Cloudflare Email Routing** for `hello@heirloomscents.com`,
+      forwarding to the owner's existing inbox, so replies to those emails
+      reach someone. Free, receive-only
+- [ ] Set the store's sender address to `hello@heirloomscents.com`
 - [ ] Order notification email pointed at the owner; Shopify mobile app
       installed for push
 - [ ] Brand the hosted checkout — logo, colours, fonts
@@ -243,6 +302,10 @@ with it.
       is not open. Wire a provider, or remove the band
 - [ ] **Analytics.** None installed
 - [ ] **Founder block.** A portrait and two sentences
+- [ ] **Put a contact address back** on `/about` and in the footer, once
+      one exists. Both deliberately show none today: an e2e test fails on
+      any `mailto:` or `@heirloomscents.com` address anywhere on the site,
+      so that test moves with this item
 - [ ] **`--nav-h` vs the real mobile header.** The token is 79px; the header is
       155–176px on a phone because it wraps, so `/scents#golds` lands with part
       of the slide behind it. Measuring it at runtime would also change the
