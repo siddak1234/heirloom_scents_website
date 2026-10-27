@@ -88,12 +88,42 @@ describe("calendlyPrefill", () => {
     });
   });
 
-  it("leaves out empty notes and questions Calendly does not have", () => {
-    expect(calendlyPrefill(valid, { phone: null, occasion: "a1", notes: "a2" })).toEqual({
-      name: "Ada Lovelace",
-      email: "ada@example.com",
-      customAnswers: { a1: "Wedding" },
+  it("leaves the notes out when there are none and nothing to carry", () => {
+    expect(calendlyPrefill(valid, keys).customAnswers).toEqual({
+      a1: "+12145550123",
+      a2: "Wedding",
     });
+  });
+
+  // The live event type has only Calendly's default question, which is notes.
+  const notesOnly = { phone: null, occasion: null, notes: "a1" };
+
+  it("carries answers without their own question into the notes, labelled, before the guest's", () => {
+    expect(
+      calendlyPrefill(
+        { ...valid, occasion: "Other", occasionOther: "Graduation", notes: " Hi Hanna! " },
+        notesOnly,
+      ).customAnswers,
+    ).toEqual({ a1: "Occasion: Other – Graduation\nPhone: +12145550123\n\nHi Hanna!" });
+  });
+
+  it("still carries them when the guest wrote no notes", () => {
+    expect(calendlyPrefill(valid, notesOnly).customAnswers).toEqual({
+      a1: "Occasion: Wedding\nPhone: +12145550123",
+    });
+  });
+
+  it("carries only what lacks a question", () => {
+    expect(
+      calendlyPrefill({ ...valid, notes: "Hi" }, { phone: "a1", occasion: null, notes: "a2" })
+        .customAnswers,
+    ).toEqual({ a1: "+12145550123", a2: "Occasion: Wedding\n\nHi" });
+  });
+
+  it("drops an answer only when there is no notes question to carry it", () => {
+    expect(
+      calendlyPrefill(valid, { phone: null, occasion: null, notes: null }).customAnswers,
+    ).toEqual({});
   });
 });
 
