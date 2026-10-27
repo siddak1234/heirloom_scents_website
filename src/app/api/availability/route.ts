@@ -33,11 +33,6 @@ export async function GET(request: Request) {
 
   try {
     const body = availabilityResponseSchema.parse(await getMonthAvailability(month, now));
-    for (const [answer, key] of Object.entries(body.answerKeys)) {
-      // Booking still works — the guest types this answer in Calendly instead —
-      // but the question name in Calendly no longer matches. docs/DEPLOYMENT.md.
-      if (key === null) console.warn(`[booking] Calendly has no "${answer}" question to pre-fill`);
-    }
     return NextResponse.json(body, { headers: CACHED });
   } catch (error) {
     if (error instanceof CalendlyNotConfiguredError) {

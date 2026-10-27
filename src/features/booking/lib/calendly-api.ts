@@ -112,10 +112,24 @@ export async function getMonthAvailability(month: string, now: Date): Promise<Av
       )
     : [];
 
+  const answerKeys = answerKeysFor(eventType.custom_questions);
+  const unmatched = Object.entries(answerKeys)
+    .filter(([, key]) => key === null)
+    .map(([answer]) => answer);
+  if (unmatched.length) {
+    // Booking still works — the guest types these answers in Calendly's window
+    // instead — but a question is missing or renamed. Naming what Calendly does
+    // have makes the fix one look at the log. docs/DEPLOYMENT.md has the names.
+    const shown = eventType.custom_questions.filter((q) => q.enabled).map((q) => `"${q.name}"`);
+    console.warn(
+      `[booking] Calendly event "${eventType.slug ?? eventType.uri}" has no question for: ${unmatched.join(", ")}. Its questions: ${shown.join(", ") || "none"}`,
+    );
+  }
+
   return {
     month,
     durationMinutes: eventType.duration,
     times: toOpenTimes(pages.flatMap((p) => p.collection)),
-    answerKeys: answerKeysFor(eventType.custom_questions),
+    answerKeys,
   };
 }

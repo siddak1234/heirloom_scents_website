@@ -101,14 +101,14 @@ calendar. Calendly's window refuses it, so it cannot double-book.
 Every failure logs one line in the project's **Logs** tab, prefixed `[booking]`.
 The token never appears in a log.
 
-| What the guest sees                     | Log                                                   | Cause and fix                                                                                                    |
-| --------------------------------------- | ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| "Online booking is briefly unavailable" | none — the route answers 503                          | `CALENDLY_TOKEN` is not set in this environment. Set it and redeploy.                                            |
-| "We couldn’t load open times"           | `Calendly /users/me → 401 …`                          | The token was revoked or mistyped. Make a new one.                                                               |
-| "We couldn’t load open times"           | `… → 403 … insufficient scope`                        | The token is missing `users:read` or `event_types:read`.                                                         |
-| "We couldn’t load open times"           | `Calendly has 2 active event types (…)`               | Deactivate the extra one, or set `CALENDLY_EVENT_SLUG`.                                                          |
-| A field is blank in Calendly's window   | `Calendly has no "phone" question to pre-fill` (WARN) | A question was renamed or removed in Calendly. Restore the name from the table above. Booking still works.       |
-| Every day greyed                        | none                                                  | Calendly has no open times in that month — check availability, date range and that the calendar is not all busy. |
+| What the guest sees                     | Log                                                     | Cause and fix                                                                                                               |
+| --------------------------------------- | ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| "Online booking is briefly unavailable" | none — the route answers 503                            | `CALENDLY_TOKEN` is not set in this environment. Set it and redeploy.                                                       |
+| "We couldn’t load open times"           | `Calendly /users/me → 401 …`                            | The token was revoked or mistyped. Make a new one.                                                                          |
+| "We couldn’t load open times"           | `… → 403 … insufficient scope`                          | The token is missing `users:read` or `event_types:read`.                                                                    |
+| "We couldn’t load open times"           | `Calendly has 2 active event types (…)`                 | Deactivate the extra one, or set `CALENDLY_EVENT_SLUG`.                                                                     |
+| A field is blank in Calendly's window   | `… has no question for: phone. Its questions: …` (WARN) | A question is missing or renamed; the log lists the names Calendly has. Match them to the table above. Booking still works. |
+| Every day greyed                        | none                                                    | Calendly has no open times in that month — check availability, date range and that the calendar is not all busy.            |
 
 ## Testing it for real
 
