@@ -55,7 +55,13 @@ type AvailableTime = z.infer<typeof availableTimesSchema>["collection"][number];
 const QUESTION_NAMES = {
   phone: ["phone number", "phone"],
   occasion: ["occasion", "the occasion"],
-  notes: ["anything else we should know", "notes"],
+  notes: [
+    "anything else we should know",
+    "notes",
+    // The question every new Calendly event type starts with. It is a notes
+    // field in all but name, so notes arrive even if it is never renamed.
+    "please share anything that will help prepare for our meeting",
+  ],
 } as const satisfies Record<keyof AnswerKeys, readonly string[]>;
 
 function normalise(name: string): string {

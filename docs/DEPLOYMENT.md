@@ -90,6 +90,8 @@ calendar. Calendly's window refuses it, so it cannot double-book.
    Occasion is deliberately plain text: Calendly cannot pre-fill the typed text
    of its own "Other" option, so the site sends "Wedding" or "Other – Graduation".
    Leave Calendly's text-reminder phone field off — it cannot be pre-filled.
+   Calendly's default question, "Please share anything that will help prepare
+   for our meeting.", is also accepted as the notes field.
 
 5. **Token** — Automations → Integrations & apps → API & Webhooks → Get a token
    now. Scopes `users:read` and `event_types:read`, nothing else: that token can

@@ -45,6 +45,12 @@ describe("answerKeysFor", () => {
     });
   });
 
+  it("takes Calendly's default question as the notes field", () => {
+    expect(
+      answerKeysFor([q("Please share anything that will help prepare for our meeting.", 0)]),
+    ).toEqual({ phone: null, occasion: null, notes: "a1" });
+  });
+
   it("reports a missing question as null rather than guessing", () => {
     expect(answerKeysFor([q("Your budget", 0)])).toEqual({
       phone: null,
