@@ -93,6 +93,21 @@ calendar. Calendly's window refuses it, so it cannot double-book.
    Calendly's default question, "Please share anything that will help prepare
    for our meeting.", is also accepted as the notes field.
 
+   **Only the notes question is essential.** An answer whose own question is
+   missing — occasion or phone — is written into the notes question instead,
+   labelled and ahead of the guest's notes, so it still reaches the host's
+   booking email:
+
+   ```
+   Occasion: Other – Graduation
+   Phone: +12145550123
+
+   About 120 guests.
+   ```
+
+   Add the dedicated questions to give each answer its own field in Calendly;
+   the site moves them there by itself.
+
 5. **Token** — Automations → Integrations & apps → API & Webhooks → Get a token
    now. Scopes `users:read` and `event_types:read`, nothing else: that token can
    read the schedule and cannot book, cancel or change anything. Copy it into
@@ -103,14 +118,15 @@ calendar. Calendly's window refuses it, so it cannot double-book.
 Every failure logs one line in the project's **Logs** tab, prefixed `[booking]`.
 The token never appears in a log.
 
-| What the guest sees                     | Log                                                     | Cause and fix                                                                                                               |
-| --------------------------------------- | ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| "Online booking is briefly unavailable" | none — the route answers 503                            | `CALENDLY_TOKEN` is not set in this environment. Set it and redeploy.                                                       |
-| "We couldn’t load open times"           | `Calendly /users/me → 401 …`                            | The token was revoked or mistyped. Make a new one.                                                                          |
-| "We couldn’t load open times"           | `… → 403 … insufficient scope`                          | The token is missing `users:read` or `event_types:read`.                                                                    |
-| "We couldn’t load open times"           | `Calendly has 2 active event types (…)`                 | Deactivate the extra one, or set `CALENDLY_EVENT_SLUG`.                                                                     |
-| A field is blank in Calendly's window   | `… has no question for: phone. Its questions: …` (WARN) | A question is missing or renamed; the log lists the names Calendly has. Match them to the table above. Booking still works. |
-| Every day greyed                        | none                                                    | Calendly has no open times in that month — check availability, date range and that the calendar is not all busy.            |
+| What the guest sees                     | Log                                                     | Cause and fix                                                                                                             |
+| --------------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| "Online booking is briefly unavailable" | none — the route answers 503                            | `CALENDLY_TOKEN` is not set in this environment. Set it and redeploy.                                                     |
+| "We couldn’t load open times"           | `Calendly /users/me → 401 …`                            | The token was revoked or mistyped. Make a new one.                                                                        |
+| "We couldn’t load open times"           | `… → 403 … insufficient scope`                          | The token is missing `users:read` or `event_types:read`.                                                                  |
+| "We couldn’t load open times"           | `Calendly has 2 active event types (…)`                 | Deactivate the extra one, or set `CALENDLY_EVENT_SLUG`.                                                                   |
+| Occasion or phone sits in the notes     | `… has no question for: phone. Its questions: …` (WARN) | Expected when that question does not exist. The log lists the names Calendly has; add or rename to match the table above. |
+| Occasion and phone missing entirely     | same, with `notes` in the list                          | Calendly has no notes question either, so there is nowhere to carry them. Add one.                                        |
+| Every day greyed                        | none                                                    | Calendly has no open times in that month — check availability, date range and that the calendar is not all busy.          |
 
 ## Testing it for real
 

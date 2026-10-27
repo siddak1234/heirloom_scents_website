@@ -54,15 +54,37 @@ export function occasionAnswer(values: Pick<BookingFormValues, "occasion" | "occ
 }
 
 /**
- * The answers to hand Calendly's window. An answer whose question is missing
- * from the event type is left out; the guest types it there instead.
+ * The answers to hand Calendly's window.
+ *
+ * Each answer goes to its own Calendly question when the event type has one.
+ * One that does not — the occasion or the phone — is written into the notes
+ * question instead, labelled and ahead of the guest's own notes, so it still
+ * reaches the host's booking email:
+ *
+ *   Occasion: Other – Graduation
+ *   Phone: +12145550123
+ *
+ *   About 120 guests.
+ *
+ * Only when there is no notes question either is an answer dropped.
  */
 export function calendlyPrefill(values: BookingFormValues, keys: AnswerKeys): CalendlyPrefill {
   const answers: Record<string, string> = {};
+  const carried: string[] = [];
+
+  const occasion = occasionAnswer(values);
+  if (keys.occasion) answers[keys.occasion] = occasion;
+  else carried.push(`Occasion: ${occasion}`);
+
   const phone = toE164(values.phone);
-  if (keys.phone && phone) answers[keys.phone] = phone;
-  if (keys.occasion) answers[keys.occasion] = occasionAnswer(values);
-  const notes = values.notes.trim();
-  if (keys.notes && notes) answers[keys.notes] = notes;
+  if (phone) {
+    if (keys.phone) answers[keys.phone] = phone;
+    else carried.push(`Phone: ${phone}`);
+  }
+
+  if (keys.notes) {
+    const notes = [carried.join("\n"), values.notes.trim()].filter(Boolean).join("\n\n");
+    if (notes) answers[keys.notes] = notes;
+  }
   return { name: values.name.trim(), email: values.email.trim(), customAnswers: answers };
 }
