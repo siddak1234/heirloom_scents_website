@@ -1,8 +1,14 @@
 import { ArrowLink, Mark } from "@/components/primitives";
 import { BOOKING_COPY } from "@/content/pages";
 import { SITE } from "@/content/site";
-import { formatWhen } from "../lib/format";
+import { formatWhen } from "../lib/schedule";
 import type { BookingResult } from "../schema";
+
+/**
+ * Shown once Calendly reports the booking made. Calendly has by then written
+ * the event to the host's calendar and emailed both sides, so this screen
+ * restates what was booked rather than promising anything still to happen.
+ */
 
 export function Confirmation({
   result,
@@ -13,7 +19,14 @@ export function Confirmation({
 }) {
   const rows: readonly { label: string; value: React.ReactNode }[] = [
     { label: "What", value: `${SITE.name} consultation — ${result.occasion}` },
-    { label: "When", value: <span className="tnum">{formatWhen(result.date, result.slot)}</span> },
+    {
+      label: "When",
+      value: result.start ? (
+        <span className="tnum">{formatWhen(result.start, result.durationMinutes)}</span>
+      ) : (
+        BOOKING_COPY.timeInInvite
+      ),
+    },
     {
       label: "Guests",
       value: (
@@ -32,7 +45,7 @@ export function Confirmation({
         {BOOKING_COPY.confirmHeading}
       </h1>
       <p className="mx-auto mt-4.5 max-w-[440px] text-body-md/[1.8] text-ink/70">
-        {`Thank you, ${result.name}. Two calendar invites have just been sent — one to you, one to your Heirloom host.`}
+        {`Thank you, ${result.name}. Calendly has sent the invite, with the meeting link, to you and your Heirloom host.`}
       </p>
 
       <div className="mt-12 border border-divider bg-surface/60 text-left">

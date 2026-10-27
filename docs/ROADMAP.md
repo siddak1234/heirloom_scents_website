@@ -52,11 +52,21 @@ email that then has to create an invite. Calendly writes the event straight into
 the owner's connected calendar with the video link attached, and emails both
 sides as a notification.
 
-**What it costs in code:** the artboard's left aside stays exactly as drawn —
-night panel, mark, the three numbered steps. The right column hosts an inline
-embed instead of the hand-built calendar. Deleted: `availability-calendar.tsx`,
-`slot-picker.tsx`, `availability.ts`, `store.ts`, both API routes, `ics.ts`, and
-their tests.
+**What it costs in code — revised.** The first plan replaced the right column
+with Calendly's inline embed (PR #4, closed unmerged). The owner wanted the
+site's own form kept, with a phone number, a free-text "Other" occasion and
+notes. So the form stays and Calendly sits behind it:
+
+- The calendar and times are **read live** from Calendly's API with a read-only
+  token. Free plan, no upgrade needed for this.
+- **Booking through the API is paid-only** (Standard, $10–12/month). On free,
+  Reserve opens Calendly's own window at the chosen time with every answer
+  pre-filled, and the guest clicks Schedule Event. Upgrading later would let
+  Reserve book directly; the form and availability code would not change.
+
+Deleted as planned: `availability.ts`, `store.ts`, `notify.ts`, `ics.ts`, the
+bookings route, `src/lib/env.ts` and their tests, plus the `ics` dependency.
+Kept: the calendar, the time picker, the form and the confirmation screen.
 
 ### 2. Commerce: Shopify as the engine, this site as the storefront
 
@@ -123,64 +133,51 @@ in the home footer and the About contact block.
 
 ---
 
-## Phase 1 — Calendly, and the cleanup it forces
+## Phase 1 — Calendly behind the site's own form
 
-The custom booking flow is replaced, not extended. Everything it needed —
-Supabase, Resend, Turnstile, `.ics` generation, availability rules, the
-honeypot — goes with it. Calendly owns all of that now.
+The hand-built calendar stays; what it showed was fake. It now shows Calendly's
+live availability, and Calendly makes the booking. Supabase, Resend, Turnstile,
+`.ics` generation and the hard-coded trading rules go — Calendly owns all of
+that. See decision 1 for why the form was kept rather than embedding Calendly.
 
-### Build
+### Calendly — done 2026-10-27
 
-- [ ] Calendly account, free plan
-- [ ] Connect the owner's real Google or Outlook calendar, so it cannot
-      double-book
-- [ ] One event type: 30 minutes, "Heirloom Scents consultation"
-- [ ] Attach Google Meet or Microsoft Teams so each booking gets its own link
-- [ ] Add the occasion question — wedding, graduation, other — and verify the
-      field type is allowed on the free plan
-- [ ] Brand colour `#b68235`
-- [ ] Confirm the owner gets the booking email, and the event lands on the
-      calendar with the link attached
-- [ ] `CalendlyEmbed` client component — inline embed, their script, lazy
-- [ ] Rewrite `sections/booking.tsx`: the artboard's night aside stays exactly
-      as drawn — mark, `h1`, the three numbered steps — and the right column
-      hosts the embed instead of the hand-built calendar
-- [ ] e2e: the embed loads on `/booking` at all four viewports, and the page
-      keeps one `h1` and no horizontal overflow
+- [x] Calendly account, free plan
+- [x] Connect the owner's real calendar, so it cannot double-book
+- [x] One event type: 30 minutes, "Heirloom Scents consultation", video link
+- [x] Questions: Phone number, Occasion (one line), Anything else we should know?
+- [x] Read-only token (`users:read`, `event_types:read`) in Vercel as
+      `CALENDLY_TOKEN`, Sensitive, Production and Preview
 
-### Delete — 1,374 lines and 5 dependencies
+### Build — done
 
-Nothing below has a consumer once the embed lands. Verified by grep, not
-assumed.
+- [x] `/api/availability` reads open times live from Calendly, cached 60s at the
+      edge; the calendar greys every day Calendly has no time on
+- [x] Times shown in the visitor's own zone, labelled with it
+- [x] Required phone, normalised to E.164; "Other" opens a free-text occasion;
+      optional notes
+- [x] Reserve opens Calendly's window at the chosen time, every answer
+      pre-filled; the confirmation waits for Calendly's `event_scheduled`
+- [x] Honest fallbacks: no token → Instagram panel; Calendly down → retry
+- [x] CSP admits exactly `assets.calendly.com` (script, style, img) and
+      `calendly.com` (frame)
+- [x] e2e against a local stand-in for Calendly's API, at all four viewports
 
-- [ ] `src/features/booking/` — all 12 files, 842 lines
-- [ ] `src/app/api/availability/route.ts` and `src/app/api/bookings/route.ts`
-- [ ] `src/lib/env.ts` — 43 lines. Its only exports are `hasBookingBackend` and
-      `hasEmailBackend`, and `store.ts` is their only consumer
-- [ ] `tests/unit/availability.test.ts`, `tests/unit/ics.test.ts`,
-      `tests/e2e/booking.spec.ts` — 400 lines
-- [ ] Dependencies: `@daypicker/react`, `date-fns`, `ics`, `react-hook-form`,
-      `@hookform/resolvers`. Each is used by the booking form alone. `zod`
-      stays — `content/site.ts` and `content/scents.ts` still validate with it
-- [ ] `Field` and `Select` from `primitives/field.tsx`. `Input` survives, used
-      by the newsletter form
-- [ ] `SITE.hostEmail` — existed only to fill the `.ics` organizer
-- [ ] `OCCASIONS` — becomes a question inside Calendly
-- [ ] From `BOOKING_COPY`, everything Calendly now owns: `submitLabel`,
-      `disclaimer`, `calendarNote`, `timeLabel`, `timeHintEmpty`,
-      `bookedSuffix`, `confirmHeading`, `confirmNote`, `inviteHeader`,
-      `inviteAttachment`, `backHome`, `bookAnother`. Keep `eyebrow`,
-      `asideHeading`, `asideBlurb`, `asideSteps`, `formHeading`
-- [ ] `docs/DEPLOYMENT.md` — the Supabase, Resend, Turnstile, soft-launch and
-      `.ics` timezone sections. Replace with the Calendly setup
-- [ ] `docs/DESIGN-PARITY.md` — the availability-mock, calendar-grid and
-      confirmation-copy rows, replaced with one row explaining the embed
+### Deleted
+
+- [x] `availability.ts`, `store.ts`, `notify.ts`, `ics.ts`, `format.ts`, the
+      bookings route, `src/lib/env.ts`, and their tests
+- [x] The `ics` dependency; `SITE.hostEmail`; the honeypot (there is no server
+      submit for a bot to reach)
 
 ### Gate
 
-- [ ] `npm run verify` green, `knip` reporting zero unused files, exports or
+- [x] `npm run verify` green, `knip` reporting zero unused files, exports or
       dependencies
-- [ ] A real test booking arrives on the calendar with a working meeting link
+- [ ] A real test booking on a preview: pre-filled answers arrive in Calendly
+      (phone format included), the event lands on the calendar with a working
+      meeting link, both emails arrive, the time disappears from the calendar
+      within a couple of minutes
 
 This closes the item that matters most: the live site currently takes enquiries
 and loses them.

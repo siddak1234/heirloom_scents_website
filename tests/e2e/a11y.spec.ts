@@ -18,6 +18,10 @@ for (const route of ROUTES) {
   test(`${route} has no WCAG 2.2 AA violations`, async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto(route, { waitUntil: "load" });
+    // /booking fills its calendar from Calendly after hydration. Scan the settled
+    // page: axe snapshots styles when a run starts, so days opening underneath it
+    // read as an open day still wearing the closed day's grey.
+    if (route === "/booking") await expect(page.getByText("Checking availability…")).toHaveCount(0);
     const results = await new AxeBuilder({ page })
       .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
       .exclude(DECORATIVE)

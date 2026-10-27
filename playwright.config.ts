@@ -3,6 +3,10 @@ import { defineConfig, devices } from "@playwright/test";
 const PORT = 3100;
 const baseURL = `http://127.0.0.1:${String(PORT)}`;
 
+/** tests/mocks/calendly-api.mjs — the stand-in for Calendly's API. */
+const CALENDLY_MOCK_PORT = 3101;
+const CALENDLY_MOCK = `http://127.0.0.1:${String(CALENDLY_MOCK_PORT)}`;
+
 export default defineConfig({
   testDir: "./tests",
   testMatch: /.*\.(spec|e2e)\.ts/,
@@ -27,7 +31,11 @@ export default defineConfig({
    * reporting contention as a failure.
    */
   expect: { timeout: 10_000 },
-  use: { baseURL, trace: "on-first-retry" },
+  /*
+   * Times are rendered in the visitor's own zone. Pinning the browser to the
+   * business's zone makes "3:00 PM" a stable assertion on any machine.
+   */
+  use: { baseURL, trace: "on-first-retry", timezoneId: "America/Chicago", locale: "en-US" },
   projects: [
     {
       name: "desktop",
@@ -43,10 +51,21 @@ export default defineConfig({
     },
     { name: "mobile", use: { ...devices["iPhone 13"] } },
   ],
-  webServer: {
-    command: `npm run build && npm run start -- --port ${String(PORT)}`,
-    url: baseURL,
-    reuseExistingServer: !process.env.CI,
-    timeout: 240_000,
-  },
+  webServer: [
+    {
+      command: "node tests/mocks/calendly-api.mjs",
+      url: `${CALENDLY_MOCK}/health`,
+      env: { CALENDLY_MOCK_PORT: String(CALENDLY_MOCK_PORT) },
+      reuseExistingServer: !process.env.CI,
+      timeout: 15_000,
+    },
+    {
+      command: `npm run build && npm run start -- --port ${String(PORT)}`,
+      url: baseURL,
+      // Read at request time by the availability route, so `start` is what needs them.
+      env: { CALENDLY_TOKEN: "e2e-token", CALENDLY_API_BASE: CALENDLY_MOCK },
+      reuseExistingServer: !process.env.CI,
+      timeout: 240_000,
+    },
+  ],
 });

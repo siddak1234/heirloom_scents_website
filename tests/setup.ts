@@ -4,8 +4,10 @@ import { afterEach, vi } from "vitest";
 
 afterEach(cleanup);
 
-// jsdom implements neither of these; several components depend on them.
-if (!window.matchMedia) {
+// jsdom implements neither of these; several components depend on them. Server
+// modules (route handlers) are tested under `@vitest-environment node`, where
+// there is no window to patch.
+if (typeof window !== "undefined" && !window.matchMedia) {
   Object.defineProperty(window, "matchMedia", {
     writable: true,
     value: (query: string) => ({

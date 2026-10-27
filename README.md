@@ -19,7 +19,9 @@ npm install
 npm run dev          # http://localhost:3000
 ```
 
-No environment variables are needed to run the site.
+The site runs with no environment variables. Live booking needs one,
+`CALENDLY_TOKEN` — without it `/booking` says online booking is unavailable and
+points to Instagram. See [Deployment](docs/DEPLOYMENT.md).
 
 ## Scripts
 
@@ -47,11 +49,11 @@ No environment variables are needed to run the site.
 | `/experience` | Experience                                                       |
 | `/events`     | Events                                                           |
 | `/about`      | About                                                            |
-| `/booking`    | Booking — form, calendar, confirmation                           |
+| `/booking`    | Booking — form, live Calendly calendar, confirmation             |
 
 ## Documentation
 
-- [Architecture](docs/ARCHITECTURE.md) — layers, tokens, the booking seam
+- [Architecture](docs/ARCHITECTURE.md) — layers, tokens, how booking reaches Calendly
 - [Deployment](docs/DEPLOYMENT.md) — Vercel setup and every environment variable
 - [Design parity](docs/DESIGN-PARITY.md) — every intentional deviation, with reasons
 - [Assets](docs/ASSETS.md) — which imagery is real and how to replace the rest
@@ -60,16 +62,12 @@ No environment variables are needed to run the site.
 
 ## Status
 
-The site is complete and deployable. Two integrations remain, both isolated
-behind one file (`src/features/booking/lib/store.ts`):
+The site is complete and deployable. Booking runs on Calendly's free plan: the
+calendar shows Calendly's live open times, and Reserve opens Calendly's window
+with the guest's answers already filled in. Calendly writes the event to the
+owner's calendar and emails both sides; this app stores nothing.
 
-- **Supabase** — booking persistence
-- **Resend** — confirmation emails
-
-Until they are configured the booking form validates fully, enforces the real
-trading rules, generates the calendar invite, and logs the emails server-side.
-
-See [Deployment](docs/DEPLOYMENT.md).
+See [Deployment](docs/DEPLOYMENT.md) for the Calendly setup.
 
 ## Contributing
 
