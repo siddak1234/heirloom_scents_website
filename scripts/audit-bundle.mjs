@@ -1,10 +1,14 @@
 /**
  * Guards the server/client boundary in the built output.
  *
- * A single import can drag a server-only library into the browser: the booking
- * confirmation once imported a date formatter from the email module, which
- * imported the `ics` calendar library — shipping ~190 KB of iCalendar code to
- * every visitor. This catches that class of regression.
+ * A single import can drag server-only code into the browser, and a single
+ * misplaced `process.env` can inline a secret into a client chunk, where anyone
+ * who views source can read it. This catches both.
+ *
+ * The one secret today is CALENDLY_TOKEN, read by
+ * `features/booking/lib/calendly-api.ts`. The rest of the list is the shape of
+ * the credentials this site will hold when Shopify and payments land — add a
+ * name here whenever a secret is introduced.
  *
  * Run after `next build`.
  */
@@ -15,12 +19,15 @@ const CLIENT_DIR = ".next/static/chunks";
 
 /** Fingerprints that must never appear in a client chunk, with why. */
 const FORBIDDEN = [
-  { needle: "BEGIN:VCALENDAR", why: "the `ics` calendar library is server-only" },
-  { needle: "SUPABASE_SERVICE_ROLE_KEY", why: "service-role key must never reach the browser" },
-  { needle: "RESEND_API_KEY", why: "email API key must never reach the browser" },
-  { needle: "TURNSTILE_SECRET_KEY", why: "Turnstile secret must never reach the browser" },
-  { needle: "guestEmailText", why: "email bodies are server-only" },
-  { needle: "hostEmailText", why: "email bodies are server-only" },
+  { needle: "CALENDLY_TOKEN", why: "the Calendly API token is server-only" },
+  {
+    needle: "api.calendly.com",
+    why: "only the server calls Calendly's API — the token-bearing client has leaked",
+  },
+  { needle: "SHOPIFY_ADMIN_ACCESS_TOKEN", why: "the Shopify Admin token is server-only" },
+  { needle: "SHOPIFY_WEBHOOK_SECRET", why: "webhook signing secret is server-only" },
+  { needle: "STRIPE_SECRET_KEY", why: "the Stripe secret key is server-only" },
+  { needle: "STRIPE_WEBHOOK_SECRET", why: "webhook signing secret is server-only" },
 ];
 
 function walk(dir) {

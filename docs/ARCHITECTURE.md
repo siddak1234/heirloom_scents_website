@@ -56,10 +56,10 @@ src/components/
   sections/       Page-specific composition (home/, scents/, booking.tsx)
   seo/            Structured data
 src/features/
-  booking/        The one feature with real logic: schema, availability, ics, UI
+  booking/        The one feature with real logic: schema, Calendly, UI
 src/content/      Every string, number, image path and link. zod-validated.
 src/styles/       globals.css (the token layer) + brand-constants.ts (its JS mirror)
-src/lib/          cn, env
+src/lib/          cn, wrap
 src/hooks/        use-active-index
 src/proxy.ts      Security headers (Next 16's rename of middleware)
 ```
@@ -124,22 +124,30 @@ watermark at the inherited 15px, with no error anywhere.
 ## Booking
 
 ```
-BookingForm ──> /api/availability ──┐
-     │                              ├──> getAvailabilityStore()  ← the seam
-     └────────> /api/bookings ──────┘         StaticAvailability (today)
-                     │                        SupabaseAvailability (later)
-                     └──> getNotifier()   ← the seam
-                              ConsoleNotifier (today)
-                              ResendNotifier (later)
+BookingForm ──> /api/availability ──> lib/calendly-api.ts ──> Calendly REST (token)
+     │                                  └─ lib/calendly.ts   shapes, windows, pre-fill map
+     └─ Reserve ──> lib/calendly-widget.ts ──> Calendly's booking window
+                         └─ postMessage "calendly.event_scheduled" ──> Confirmation
 ```
 
-One zod schema (`src/features/booking/schema.ts`) validates on both the client
-and the server, so a payload the browser accepts cannot fail differently on the
-server. The route handler re-checks availability regardless of what the client
-sends.
+Calendly is the scheduler and the record; this app is the form in front of it.
 
-Swapping in the real backends touches exactly one file:
-`src/features/booking/lib/store.ts`. See `docs/DEPLOYMENT.md`.
+| File                     | Runs on | Does                                                                                      |
+| ------------------------ | ------- | ----------------------------------------------------------------------------------------- |
+| `schema.ts`              | both    | The form's rules and the `/api/availability` contract, in zod                             |
+| `lib/calendly-api.ts`    | server  | The only code holding `CALENDLY_TOKEN`. `server-only`, so a client import fails the build |
+| `lib/calendly.ts`        | server  | Pure: response shapes, the 31-day request windows, question names → `a1`…`a10`            |
+| `lib/calendly-widget.ts` | client  | Loads Calendly's popup on demand, and trusts messages from `calendly.com` only            |
+| `lib/schedule.ts`        | client  | Groups UTC times into the visitor's own days, builds the pre-fill                         |
+| `lib/phone.ts`           | both    | Normalises a typed number to E.164                                                        |
+
+Times travel as UTC instants and are only turned into days and clock times in
+the browser, in the visitor's zone — the same zone Calendly's window shows. The
+server never decides what day it is for anyone.
+
+Calendly's API can book on paid plans only. On the free plan the guest confirms
+in Calendly's window; see `docs/DEPLOYMENT.md` for the setup and the failure
+modes.
 
 ## Motion
 
@@ -160,17 +168,24 @@ delay leaves an element at `opacity: 0` for the whole delay.
 
 ## Testing
 
-| Layer | Tool                     | Covers                                                                                                                                        |
-| ----- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| Unit  | Vitest                   | availability rules, `.ics` generation, email bodies, content integrity, carousel index arithmetic, the `cn` merge contract                    |
-| E2E   | Playwright × 4 viewports | every route renders, no overflow, links resolve, anchors land, booking flow, and a button-by-button sweep of every control the artboards draw |
-| A11y  | axe-core                 | WCAG 2.2 AA on all six routes, heading order                                                                                                  |
+| Layer | Tool                     | Covers                                                                                                                                           |
+| ----- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Unit  | Vitest                   | Calendly windows and pre-fill mapping, the availability route, form rules, content integrity, carousel index arithmetic, the `cn` merge contract |
+| E2E   | Playwright × 4 viewports | every route renders, no overflow, links resolve, anchors land, booking flow, and a button-by-button sweep of every control the artboards draw    |
+| A11y  | axe-core                 | WCAG 2.2 AA on all six routes, heading order                                                                                                     |
 
 Playwright runs desktop (1440), laptop (1024), tablet (768) and mobile
 (iPhone 13 / WebKit) — two of them above the design's 861px line and two below.
 Accessibility runs are made under `prefers-reduced-motion` so axe measures
-settled state rather than mid-transition opacity.
+settled state rather than mid-transition opacity, and `/booking` is scanned only
+once its calendar has loaded.
 
-305 e2e assertions pass; the 7 skips are the design-intended ones — the
-desktop-only scent deck below `desk`, and the skip link on WebKit, which does
-not tab to links by default.
+The booking suite runs against `tests/mocks/calendly-api.mjs`, a local stand-in
+for the three Calendly endpoints the site reads. It enforces Calendly's own
+limits — bearer token, start in the future, at most 31 days per request — so a
+regression in how the site asks fails here rather than in production. Calendly's
+popup script is stubbed per test to record exactly what it was asked to open.
+
+375 e2e tests pass; the 9 skips are the design-intended ones — the
+desktop-only rails below `desk`, the phone-only checks above it, and the skip
+link on WebKit, which does not tab to links by default.

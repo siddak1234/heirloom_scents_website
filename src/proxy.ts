@@ -18,16 +18,37 @@ const SCRIPT_SRC =
     ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
     : "script-src 'self' 'unsafe-inline'";
 
+/*
+ * The booking form opens Calendly's popup, which needs exactly these:
+ *
+ *   assets.calendly.com  widget.js, widget.css, and the close icon the
+ *                        stylesheet references (/assets/external/close-icon.svg)
+ *   calendly.com         the booking iframe the popup holds
+ *
+ * Not 'unsafe-eval' — widget.js contains no `eval(` or `new Function(`; the
+ * scheduling app runs inside the iframe under Calendly's own policy, not ours.
+ * Not connect-src either: availability is read server-side through our own
+ * /api/availability, so the browser never calls Calendly's API.
+ */
+const CALENDLY_ASSETS = "https://assets.calendly.com";
+const CALENDLY_FRAME = "https://calendly.com";
+
 const BASE_DIRECTIVES = [
   "default-src 'self'",
   // Next injects inline bootstrap scripts; 'unsafe-inline' is required for them.
-  SCRIPT_SRC,
+  `${SCRIPT_SRC} ${CALENDLY_ASSETS}`,
   // Tailwind and next/font emit inline style attributes.
-  "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob:",
+  `style-src 'self' 'unsafe-inline' ${CALENDLY_ASSETS}`,
+  `img-src 'self' data: blob: ${CALENDLY_ASSETS}`,
   "font-src 'self' data:",
   "connect-src 'self'",
   "form-action 'self'",
+  /*
+   * frame-src governs what WE may embed; without it frames fall back to
+   * default-src 'self' and Calendly's window is blocked. frame-ancestors below
+   * is the opposite direction — who may embed us — and stays 'none'.
+   */
+  `frame-src ${CALENDLY_FRAME}`,
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "object-src 'none'",

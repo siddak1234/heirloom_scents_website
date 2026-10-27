@@ -1,31 +1,37 @@
 "use client";
 
 import { DayPicker } from "@daypicker/react";
-import { isSameDay, parseISO, startOfMonth } from "date-fns";
-import { isStructurallyClosed, lastBookableDay, toIso } from "../lib/availability";
-import { BOOKING_COPY } from "@/content/pages";
+import { addMonths, parseISO, startOfMonth } from "date-fns";
+import { MAX_MONTHS_AHEAD } from "../schema";
+import { toIso } from "../lib/schedule";
 
 /**
  * The booking calendar. Styled to the artboard — square cells, accent border on
  * the selection, greyed closed days — but built on DayPicker so it has a real
  * ARIA grid and full keyboard navigation, which the artboard's button grid had
  * neither of.
+ *
+ * Which days are open is entirely Calendly's: a day is selectable only when
+ * Calendly reported at least one open time on it. Working days, hours, notice
+ * and how far ahead guests may book are all set there, not here.
  */
 export function AvailabilityCalendar({
   value,
   onChange,
-  closedDates,
+  openDays,
   month,
   onMonthChange,
+  note,
 }: {
   readonly value: string;
   readonly onChange: (iso: string) => void;
-  readonly closedDates: readonly string[];
+  /** Local ISO days with an open time; null while the month is loading. */
+  readonly openDays: ReadonlySet<string> | null;
   readonly month: Date;
   readonly onMonthChange: (month: Date) => void;
+  readonly note: React.ReactNode;
 }) {
-  const today = new Date();
-  const closed = closedDates.map((d) => parseISO(d));
+  const firstMonth = startOfMonth(new Date());
   const selected = value ? parseISO(value) : undefined;
 
   return (
@@ -34,15 +40,13 @@ export function AvailabilityCalendar({
         mode="single"
         month={month}
         onMonthChange={onMonthChange}
-        startMonth={startOfMonth(today)}
-        endMonth={lastBookableDay(today)}
+        startMonth={firstMonth}
+        endMonth={addMonths(firstMonth, MAX_MONTHS_AHEAD)}
         {...(selected ? { selected } : {})}
         onSelect={(date) => {
           if (date) onChange(toIso(date));
         }}
-        disabled={(date) =>
-          isStructurallyClosed(date, today) || closed.some((c) => isSameDay(c, date))
-        }
+        disabled={(date) => !openDays?.has(toIso(date))}
         showOutsideDays={false}
         classNames={{
           root: "hs-daypicker relative [&_.rdp-chevron]:size-3 [&_.rdp-chevron]:fill-current",
@@ -69,7 +73,9 @@ export function AvailabilityCalendar({
           outside: "invisible",
         }}
       />
-      <p className="mt-3 text-label-md text-ink/65">{BOOKING_COPY.calendarNote}</p>
+      <div className="mt-3 text-label-md text-ink/65" aria-live="polite">
+        {note}
+      </div>
     </div>
   );
 }

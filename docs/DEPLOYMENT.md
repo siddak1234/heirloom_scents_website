@@ -1,8 +1,8 @@
 # Deployment
 
 The site is a standard Next.js 16 app and deploys to Vercel with no custom build
-configuration. It **builds and runs today with no environment variables set** —
-every one below is optional until the booking backend is wired.
+configuration. Every route is statically prerendered except `/api/availability`,
+which reads Calendly at request time.
 
 ```bash
 npm install
@@ -19,142 +19,108 @@ npm run dev
 
 ## Environment variables
 
-**No secret is committed to this repository.** `src/lib/env.ts` validates these at
-boot with zod, so a malformed value fails the deploy rather than the first booking.
+**No secret is committed to this repository.** A change to any of these takes
+effect on the next deployment.
 
-### Needed now
+| Variable               | Scope      | Environments        | Notes                                                                                                                      |
+| ---------------------- | ---------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `CALENDLY_TOKEN`       | **Secret** | Production, Preview | Calendly personal access token, scopes `users:read` and `event_types:read` only. Mark it **Sensitive**. See Booking below. |
+| `CALENDLY_EVENT_SLUG`  | Plain      | Production, Preview | Optional. Only needed if the Calendly account ever has more than one active event type — the slug of the one to book.      |
+| `NEXT_PUBLIC_SITE_URL` | Public     | Production, Preview | Canonical origin, e.g. `https://heirloomscents.com`. Falls back to the value in `src/content/site.ts` if unset.            |
 
-| Variable               | Scope  | Environments        | Notes                                                                                                           |
-| ---------------------- | ------ | ------------------- | --------------------------------------------------------------------------------------------------------------- |
-| `NEXT_PUBLIC_SITE_URL` | Public | Production, Preview | Canonical origin, e.g. `https://heirloomscents.com`. Falls back to the value in `src/content/site.ts` if unset. |
+`CALENDLY_API_BASE` also exists, for the end-to-end suite only: Playwright points
+it at `tests/mocks/calendly-api.mjs`. Never set it in Vercel.
 
-## Soft launch: where bookings go today
+Without `CALENDLY_TOKEN` the site still builds and runs; `/booking` shows an
+honest "online booking is briefly unavailable" panel with an Instagram link
+instead of a calendar that cannot book.
 
-**Nothing is persisted and no mail is sent.** `getAvailabilityStore()` returns
-`StaticAvailability`, whose `reserve()` hands back a random reference and stores
-nothing; `getNotifier()` returns `ConsoleNotifier`, which writes to the server
-log. The guest still sees "Your consultation is scheduled" and "Two calendar
-invites have just been sent", because that is what the artboard's confirmation
-screen says.
+`scripts/audit-bundle.mjs` fails the build if `CALENDLY_TOKEN`, or any code that
+calls `api.calendly.com`, reaches a client chunk.
 
-So during a soft launch **the runtime log is the booking record**, and somebody
-has to read it.
+## Booking
 
-Each enquiry writes one WARN line carrying everything needed to honour it:
+Scheduling is **Calendly, on its free plan**, behind the site's own form.
 
 ```
-[booking] NOT DELIVERED — no email backend configured, this log is the only record:
-{"reference":"HS-AB12CD","name":"…","email":"…","occasion":"Wedding","date":"2026-09-22","slot":"3:00 PM"}
+Browser                          This server                    Calendly
+───────                          ───────────                    ────────
+calendar, times ── GET ──> /api/availability ── token ──> REST API (read-only)
+Reserve ── opens ─────────────────────────────────────> booking window (iframe)
+confirmation <── postMessage "event_scheduled" ─────────┘
 ```
 
-Find them with either:
+- **Availability is live.** `/api/availability?month=YYYY-MM` asks Calendly for
+  the event type's open times (two requests per month — Calendly allows 31 days
+  per request) and returns them with the consultation length and the pre-fill
+  map. Vercel's edge caches each month for 60 seconds.
+- **The booking itself is Calendly's.** Creating a booking through Calendly's API
+  needs a paid plan. On the free plan, Reserve opens Calendly's own window at the
+  chosen time with name, email, phone, occasion and notes already filled in; the
+  guest clicks **Schedule Event** there. Calendly then writes the event to the
+  connected calendar with the meeting link and emails both sides.
+- **Nothing is stored here.** There is no database, no webhook and no email
+  provider. Calendly is the record of every booking.
 
-```bash
-vercel logs <deployment-url> | grep '\[booking\]'
-```
+A time booked in the 60 seconds the edge holds a month can still show on the
+calendar. Calendly's window refuses it, so it cannot double-book.
 
-or the project's **Logs** tab, filtered to `Warning` and searching `[booking]`.
+### Setting up Calendly
 
-Two things to know before relying on this:
+1. **Connect the real calendar** — Settings → Scheduling → Calendars. This is
+   what stops a consultation landing on a time that is already committed.
+2. **One event type** — Scheduling → Event types. Free allows one active event
+   type; edit the one Calendly created rather than adding a second.
+   - Name "Heirloom Scents consultation", 30 minutes
+   - Location: Google Meet, Zoom or Teams, so each booking gets its own link
+   - Time zone: Central
+3. **Availability** — days, hours, minimum notice and how far ahead guests may
+   book are all read live. Whatever Calendly offers is what the calendar shows;
+   nothing about the schedule is hard-coded in this site. Discrete windows
+   (10:00–10:30, 12:30–1:00 …) produce exactly those times.
+4. **Booking questions**, matched **by name** (case and punctuation ignored), so
+   their order does not matter:
 
-- **Vercel retains runtime logs for a limited window**, and the window depends on
-  the plan. An enquiry that is not read inside it is gone. Check the retention
-  figure for the current plan rather than assuming.
-- A guest has **no way to follow up**. There is no public contact address, so an
-  enquiry missed in the log is a lost booking with no second chance.
+   | Name                            | Type           | Required |
+   | ------------------------------- | -------------- | -------- |
+   | `Phone number`                  | Phone number   | Yes      |
+   | `Occasion`                      | One line       | Yes      |
+   | `Anything else we should know?` | Multiple lines | No       |
 
-Set `RESEND_API_KEY` and the enquiry is emailed instead; set `SUPABASE_*` and it
-is also stored. Both are one edit in `src/features/booking/lib/store.ts`.
+   Occasion is deliberately plain text: Calendly cannot pre-fill the typed text
+   of its own "Other" option, so the site sends "Wedding" or "Other – Graduation".
+   Leave Calendly's text-reminder phone field off — it cannot be pre-filled.
+   Calendly's default question, "Please share anything that will help prepare
+   for our meeting.", is also accepted as the notes field.
 
-### Needed to turn the booking form into real bookings
+5. **Token** — Automations → Integrations & apps → API & Webhooks → Get a token
+   now. Scopes `users:read` and `event_types:read`, nothing else: that token can
+   read the schedule and cannot book, cancel or change anything. Copy it into
+   `CALENDLY_TOKEN` in Vercel as Sensitive.
 
-Until these are set, `/api/bookings` validates the request, enforces the trading
-rules, generates the `.ics`, and logs the two emails to the server console. The
-form, the calendar, and the confirmation screen are all fully working.
+### When something is wrong
 
-| Variable                    | Scope      | Environments        | Purpose                                                                        |
-| --------------------------- | ---------- | ------------------- | ------------------------------------------------------------------------------ |
-| `SUPABASE_URL`              | **Secret** | Production, Preview | Project URL for booking persistence.                                           |
-| `SUPABASE_SERVICE_ROLE_KEY` | **Secret** | Production, Preview | Server-only key. Never expose to the browser — it bypasses RLS.                |
-| `RESEND_API_KEY`            | **Secret** | Production, Preview | Sends the guest and host confirmation emails.                                  |
-| `BOOKING_HOST_EMAIL`        | Plain      | Production, Preview | Where host notifications go. Defaults to the address in `src/content/site.ts`. |
+Every failure logs one line in the project's **Logs** tab, prefixed `[booking]`.
+The token never appears in a log.
 
-### Needed to enable bot protection
+| What the guest sees                     | Log                                                     | Cause and fix                                                                                                               |
+| --------------------------------------- | ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| "Online booking is briefly unavailable" | none — the route answers 503                            | `CALENDLY_TOKEN` is not set in this environment. Set it and redeploy.                                                       |
+| "We couldn’t load open times"           | `Calendly /users/me → 401 …`                            | The token was revoked or mistyped. Make a new one.                                                                          |
+| "We couldn’t load open times"           | `… → 403 … insufficient scope`                          | The token is missing `users:read` or `event_types:read`.                                                                    |
+| "We couldn’t load open times"           | `Calendly has 2 active event types (…)`                 | Deactivate the extra one, or set `CALENDLY_EVENT_SLUG`.                                                                     |
+| A field is blank in Calendly's window   | `… has no question for: phone. Its questions: …` (WARN) | A question is missing or renamed; the log lists the names Calendly has. Match them to the table above. Booking still works. |
+| Every day greyed                        | none                                                    | Calendly has no open times in that month — check availability, date range and that the calendar is not all busy.            |
 
-| Variable                         | Scope      | Environments        | Purpose                                        |
-| -------------------------------- | ---------- | ------------------- | ---------------------------------------------- |
-| `TURNSTILE_SECRET_KEY`           | **Secret** | Production, Preview | Cloudflare Turnstile server-side verification. |
-| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | Public     | Production, Preview | Turnstile widget site key.                     |
+## Testing it for real
 
-A honeypot field already ships and needs no configuration.
+On a preview deployment, with the token set for Preview:
 
-## Wiring the remaining backends
-
-Everything routes through one seam: **`src/features/booking/lib/store.ts`**. No
-other file refers to a concrete backend.
-
-```ts
-export function getAvailabilityStore(): AvailabilityStore {
-  if (hasBookingBackend) {
-    // return new SupabaseAvailability(...)   ← the whole change
-  }
-  return new StaticAvailability();
-}
-```
-
-### Supabase
-
-Implement `AvailabilityStore` (`src/features/booking/lib/availability.ts`):
-
-- `takenSlotsForMonth(month)` → `{ "2026-09-15": ["3:00 PM"], … }`
-- `reserve({ date, slot, … })` → `{ ok: true, reference }` or `{ ok: false, reason: "taken" }`
-
-Suggested schema:
-
-```sql
-create table bookings (
-  id          uuid primary key default gen_random_uuid(),
-  reference   text not null unique,
-  name        text not null,
-  email       text not null,
-  occasion    text not null,
-  date        date not null,
-  slot        text not null,
-  created_at  timestamptz not null default now(),
-  -- Makes double-booking impossible at the database level rather than in app code.
-  unique (date, slot)
-);
-alter table bookings enable row level security;
--- No public policies: all access is via the service role from the route handler.
-```
-
-`reserve` must translate a unique-violation into `{ ok: false, reason: "taken" }`.
-The route handler already returns 409 for that case and the form already surfaces it.
-
-### Resend
-
-Implement `Notifier` (`src/features/booking/lib/notify.ts`). The message bodies and
-the `.ics` attachment are already built and unit-tested — only the transport is
-missing:
-
-```ts
-await resend.emails.send({
-  from: `Heirloom Scents <${BOOKING_HOST_EMAIL}>`,
-  to: details.email,
-  subject: "Your Heirloom Scents consultation",
-  text: guestEmailText(details),
-  attachments: [{ filename: "invite.ics", content: buildConsultationIcs(details) }],
-});
-```
-
-Verify the sending domain in Resend before going live.
-
-## Known follow-up: calendar timezone
-
-`buildConsultationIcs` emits **floating local time** on purpose. The library's
-default converts using the _server's_ clock, so on Vercel (UTC) a 3:00 PM slot
-would reach the guest's calendar as 10:00 AM Dallas. Floating time carries the
-wall-clock time the guest chose and is host-independent. A unit test guards this.
-
-Once bookings are real, pin the event to `America/Chicago` with a proper
-VTIMEZONE block so daylight-saving transitions are unambiguous.
+1. Book a consultation with your own details. The calendar's open times should
+   match Calendly's own booking page.
+2. Calendly's window opens at the chosen time with every answer already filled
+   in — **check the phone number arrived in the right format**.
+3. Confirm. The event lands on the connected calendar with a meeting link, both
+   emails arrive, and phone, occasion and notes appear on the booking in Calendly.
+4. Reload within a minute or two: the booked time is gone from the calendar.
+5. Cancel the test booking in Calendly.

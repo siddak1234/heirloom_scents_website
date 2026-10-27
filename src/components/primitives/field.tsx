@@ -50,3 +50,8 @@ export function Input({ className, ...props }: React.ComponentPropsWithoutRef<"i
 export function Select({ className, ...props }: React.ComponentPropsWithoutRef<"select">) {
   return <select className={cn(CONTROL, "cursor-pointer", className)} {...props} />;
 }
+
+/** The same control, multi-line. Grows vertically only, so it cannot break the column. */
+export function Textarea({ className, ...props }: React.ComponentPropsWithoutRef<"textarea">) {
+  return <textarea className={cn(CONTROL, "min-h-24 resize-y", className)} {...props} />;
+}

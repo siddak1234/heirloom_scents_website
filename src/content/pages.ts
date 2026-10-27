@@ -192,18 +192,49 @@ export const BOOKING_COPY = {
   asideSteps: ["Invite sent instantly", "We plan it on the call", "Proposal within two days"],
   formHeading: "Reserve your consultation.",
   submitLabel: "Reserve",
+  submitOpening: "Opening…",
   disclaimer:
-    "No commitment — the consultation is complimentary. A calendar invite goes to you and your Heirloom host.",
+    "No commitment — the consultation is complimentary. You confirm in a Calendly window, and the invite goes to you and your Heirloom host.",
+  /** Shown once the Calendly window is open, until the booking is confirmed there. */
+  finishInCalendly:
+    "Almost there — choose “Schedule Event” in the Calendly window to confirm. Closed it by mistake? Press Reserve again.",
   calendarNote: "Greyed days are fully booked or closed.",
+  calendarLoading: "Checking availability…",
+  monthEmpty: "No openings this month — try the next one.",
+  loadError: "We couldn’t load open times.",
+  retry: "Try again",
   timeLabel: "Time",
   timeHintEmpty: "pick a day first",
-  bookedSuffix: "— booked",
+  timePlaceholder: "Open times for the day you pick appear here.",
+  timeGone: "That time was just taken. Please pick another.",
+  widgetError: "We couldn’t open the booking window. Check your connection and try again.",
+  /*
+   * Shown when the scheduler cannot be reached at all — no token configured,
+   * or Calendly refusing it. A calendar that cannot book is worse than an
+   * honest message with a route that works.
+   */
+  unconfigured:
+    "Online booking is briefly unavailable. Message us and we’ll find a time for your consultation.",
   confirmHeading: "Your consultation is scheduled.",
-  confirmNote: "Need a different time? Reply to the invite and we’ll move it.",
+  confirmNote: "Need a different time? Use the reschedule link in your Calendly email.",
   inviteHeader: "Calendar invite sent",
-  inviteAttachment: ".ics attached",
+  inviteAttachment: "via Calendly",
+  /** Stands in for the time when the guest changed it inside Calendly's window. */
+  timeInInvite: "As confirmed in your Calendly invite",
   backHome: "Back to home",
   bookAnother: "Book another",
 } as const;
 
-export const OCCASIONS = ["Wedding", "Bridal Shower", "Private Event", "Brand Experience"] as const;
+/**
+ * The last choice opens a free-text field. Calendly receives the occasion as
+ * one line of text — "Wedding", or "Other – Graduation" — because its own
+ * "Other" option cannot be pre-filled.
+ */
+export const OCCASION_OTHER = "Other";
+export const OCCASIONS = [
+  "Wedding",
+  "Bridal Shower",
+  "Private Event",
+  "Brand Experience",
+  OCCASION_OTHER,
+] as const;
