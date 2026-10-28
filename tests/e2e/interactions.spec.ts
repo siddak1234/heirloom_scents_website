@@ -134,6 +134,10 @@ test.describe("home — the rest of the page", () => {
     await expect(page.getByText("We are Heirloom.")).toHaveCount(0);
     await expect(page.getByText("Popular combinations")).toHaveCount(0);
     await expect(page.getByRole("link", { name: /Read these scents/ })).toHaveCount(0);
+    await expect(page.getByRole("img", { name: /perfume bar cart/ })).toHaveAttribute(
+      "src",
+      /brand-bar-cart/,
+    );
   });
 
   test("the announcement names the booking year", async ({ page }) => {
@@ -444,6 +448,18 @@ test.describe("scent library", () => {
 });
 
 test.describe("experience", () => {
+  test("the hero runs the bar footage behind its heading, silent", async ({ page }) => {
+    await page.goto("/experience");
+    const hero = page.locator("section", {
+      has: page.getByRole("heading", { level: 1 }),
+    });
+    const video = hero.locator("video");
+    await expect(video).toHaveAttribute("src", "/video/reel-bar-pan.mp4");
+    await expect(video).toHaveAttribute("poster", "/video/reel-bar-pan-poster.jpg");
+    expect(await video.evaluate((el: HTMLVideoElement) => el.muted && el.loop)).toBe(true);
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+  });
+
   test("only step one links, and it reaches the library", async ({ page }) => {
     await settle(page);
     await page.goto("/experience");

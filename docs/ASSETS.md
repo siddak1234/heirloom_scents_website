@@ -2,12 +2,12 @@
 
 Every asset is the real thing. There are no placeholders.
 
-| Group                   | Count | Source                                          |
-| ----------------------- | ----- | ----------------------------------------------- |
-| `public/images/brand/`  | 8     | `hs-mark.png` + seven `brand-*.jpg` photographs |
-| `public/images/scents/` | 9     | the `bottle-*` files and `bg-scents-hero.png`   |
-| `public/images/photos/` | 6     | the `photo-*` studio renders                    |
-| `public/video/`         | 4 + 4 | `reel-1…4.mp4` and a poster frame for each      |
+| Group                   | Count | Source                                                          |
+| ----------------------- | ----- | --------------------------------------------------------------- |
+| `public/images/brand/`  | 9     | `hs-mark.png` + eight `brand-*.jpg` photographs                 |
+| `public/images/scents/` | 9     | the `bottle-*` files and `bg-scents-hero.png`                   |
+| `public/images/photos/` | 5     | the `photo-*` studio renders                                    |
+| `public/video/`         | 5 + 5 | `reel-1…4.mp4`, `reel-bar-pan.mp4`, and a poster frame for each |
 
 `src/content/media-manifest.ts` is generated from these by
 `npm run media:manifest`, which records every file's real pixel dimensions so
@@ -59,6 +59,21 @@ avconvert -s source.MOV -p Preset1920x1080 -o source-sdr.mov
 
 `reel-2` was made this way on 2026-10-27, from 37 MB of HDR to 2.8 MB.
 
+`reel-bar-pan` — the experience hero — is the exception to the reel encode. It
+is only ever a muted background, so it carries **no audio track**, and it fills
+a full-width banner, so it is **1080 × 1920** rather than 576 × 1024. Its source
+is a 4.7s pan, which would jump back to the start on every loop, so it is played
+forward then reversed — a seamless 9.4s loop at 2.1 MB. The two turnaround frames
+are trimmed so the loop never holds a frame:
+
+```bash
+# fwd.mp4: the SDR source at 30 fps; N = its frame count
+ffmpeg -i fwd.mp4 -map_metadata -1 -filter_complex \
+  "[0:v]split[f][b];[b]reverse,trim=start_frame=1:end_frame=N-1,setpts=PTS-STARTPTS[r];[f][r]concat=n=2:v=1:a=0,format=yuv420p[v]" \
+  -map "[v]" -an -c:v libx264 -preset slow -crf 28 -profile:v high \
+  -color_primaries bt709 -color_trc bt709 -colorspace bt709 -movflags +faststart reel-bar-pan.mp4
+```
+
 There is no `next/image` equivalent for video, so weight is managed by hand:
 
 - Poster frames are extracted at 1s, so the still matches the first frame and
@@ -71,6 +86,15 @@ There is no `next/image` equivalent for video, so weight is managed by hand:
 
 Photographs are JPEG at quality 82 (mozjpeg, via `sharp`, which drops metadata),
 cropped to the ratio of the plate they fill when they have only one home.
+
+**iPhone photos are HEIC**, and `sharp`'s prebuilt binary refuses them
+("Number of references in iref box exceeds the security limits"). Convert with
+macOS's `sips` first, then crop and encode with `sharp` as above — the `sharp`
+step is what removes the photo's GPS location:
+
+```bash
+sips -s format png IMG_1234.heic --out source.png
+```
 
 ## Provenance
 
@@ -90,3 +114,8 @@ Added after launch, from the owner directly (2026-10-27):
   so the dispensers and the lettering both stay in frame on the Private Events
   card.
 - `reel-2.mp4` — an October 2026 event, replacing the original second film.
+- `brand-bar-cart.jpg` — the Perfume Bar cart, photographed 2026-10-24, beside
+  "Created for unforgettable celebrations." on the home page. Cropped 4:5 from
+  the gold arch to the wheels of a 3213 × 5712 HEIC and resized to 1080 wide.
+- `reel-bar-pan.mp4` — a pan across the same cart, behind the experience hero.
+  It replaced `photo-step2-blend.png`, which nothing else used and was removed.

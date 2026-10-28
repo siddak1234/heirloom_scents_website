@@ -48,8 +48,8 @@ export default function HomePage() {
         cta={HOME_COPY.aboutCta}
         href="/about"
         ctaStyle="link"
-        image="brand-gold-stand"
-        imageAlt="The Heirloom bar"
+        image="brand-bar-cart"
+        imageAlt="The Heirloom perfume bar cart, its dispensers under the Perfume Bar sign"
       />
 
       <NewsletterBand />

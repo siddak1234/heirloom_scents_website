@@ -173,6 +173,8 @@ recorded so the artboards are not mistaken for the current spec.
 | Home: "We are Heirloom." and one justified paragraph         | "Created for unforgettable celebrations.", two paragraphs and an italic closing line; label and link unchanged | 2026-10-27 |
 | Events: the second film                                      | The studio's own October 2026 event reel                                                                       | 2026-10-27 |
 | Events: Private Events photographed with `brand-glasses`     | `brand-bar-dispensers` — the bar itself. `brand-glasses` stays in the home filmstrip                           | 2026-10-27 |
+| Home: the story block's `brand-gold-stand` photograph        | `brand-bar-cart` — the Perfume Bar cart. `brand-gold-stand` stays on the second hero slide                     | 2026-10-27 |
+| Experience hero: `photo-step2-blend` still, at 36%           | `reel-bar-pan`, a looping pan across the cart, at the same 36% under the same veil                             | 2026-10-27 |
 
 ---
 

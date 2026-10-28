@@ -5,8 +5,8 @@ import { video, type VideoKey } from "@/content/media-manifest";
 import { cn } from "@/lib/cn";
 
 /**
- * A silent looping reel behind content. Six instances: the home video band, the
- * events hero, and the four films in the events grid.
+ * A silent looping reel behind content. Seven instances: the home video band,
+ * the events hero, the experience hero, and the four films in the events grid.
  *
  * The artboards force playback with a 900ms interval that re-mutes and
  * re-plays every background video. That is a workaround for the design canvas's
