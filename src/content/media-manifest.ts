@@ -13,6 +13,7 @@ export interface VideoAsset extends ImageAsset {
 }
 
 export const IMAGES = {
+  "brand-bar-cart": { src: "/images/brand/brand-bar-cart.jpg", width: 1080, height: 1350 },
   "brand-bar-dispensers": {
     src: "/images/brand/brand-bar-dispensers.jpg",
     width: 967,
@@ -58,7 +59,6 @@ export const IMAGES = {
   "photo-bottle-hand": { src: "/images/photos/photo-bottle-hand.png", width: 1008, height: 889 },
   "photo-closeup-tray": { src: "/images/photos/photo-closeup-tray.png", width: 1109, height: 1245 },
   "photo-step1-choose": { src: "/images/photos/photo-step1-choose.png", width: 1109, height: 999 },
-  "photo-step2-blend": { src: "/images/photos/photo-step2-blend.png", width: 983, height: 1094 },
   "photo-step3-bottles": {
     src: "/images/photos/photo-step3-bottles.png",
     width: 1159,
@@ -90,6 +90,12 @@ export const VIDEOS = {
     poster: "/video/reel-4-poster.jpg",
     width: 576,
     height: 1024,
+  },
+  "reel-bar-pan": {
+    src: "/video/reel-bar-pan.mp4",
+    poster: "/video/reel-bar-pan-poster.jpg",
+    width: 1080,
+    height: 1920,
   },
 } as const satisfies Record<string, VideoAsset>;
 
