@@ -21,9 +21,9 @@ const siteSchema = z.object({
  * Instagram and the booking form are the two contact routes that work. The
  * calendar invite comes from Calendly, so the site needs no mailbox of its own.
  *
- * `announcement.notice` names a season and a year. It is the one string on the
- * site that goes stale on a calendar — it lives here so it can be changed in
- * one place, not hunted for in markup.
+ * `announcement.notice` names a year. It is the one string on the site that
+ * goes stale on a calendar — it lives here so it can be changed in one place,
+ * not hunted for in markup.
  */
 export const SITE = siteSchema.parse({
   name: "Heirloom Scents",
@@ -36,7 +36,7 @@ export const SITE = siteSchema.parse({
   instagram: "@heirloomscents",
   copyrightYear: 2026,
   announcement: {
-    notice: "Now booking fall and winter 2026 dates",
+    notice: "Now booking dates for 2027",
     cta: "Book Now",
   },
 });

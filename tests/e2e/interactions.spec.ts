@@ -124,17 +124,21 @@ test.describe("home — scent rail", () => {
 });
 
 test.describe("home — the rest of the page", () => {
-  test("each combination card links to the scent library", async ({ page }) => {
+  test("the story block carries the new copy, and the combinations are gone", async ({ page }) => {
     await settle(page);
     await page.goto("/");
-    const cards = page.getByRole("article");
-    await expect(cards).toHaveCount(4);
-    for (let i = 0; i < 4; i++) {
-      await expect(cards.nth(i).getByRole("link", { name: /Read these scents/ })).toHaveAttribute(
-        "href",
-        "/scents",
-      );
-    }
+    await expect(
+      page.getByRole("heading", { name: "Created for unforgettable celebrations." }),
+    ).toBeVisible();
+    await expect(page.getByText("Not just a fragrance. A memory, bottled.")).toBeVisible();
+    await expect(page.getByText("We are Heirloom.")).toHaveCount(0);
+    await expect(page.getByText("Popular combinations")).toHaveCount(0);
+    await expect(page.getByRole("link", { name: /Read these scents/ })).toHaveCount(0);
+  });
+
+  test("the announcement names the booking year", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.getByText("Now booking dates for 2027")).toBeVisible();
   });
 
   test("the video band and story block reach their routes", async ({ page }) => {

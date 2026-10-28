@@ -4,8 +4,8 @@ import { cn } from "@/lib/cn";
 
 /**
  * The underlined "About Us →" pattern. Five call sites: the home story block,
- * the combination cards, the first experience step, the event cards, and the
- * booking confirmation (which drops the arrow).
+ * the first experience step, the event cards, the booking page's Instagram
+ * fallback, and the booking confirmation (which drops the arrow).
  */
 const arrowLinkVariants = cva(
   [

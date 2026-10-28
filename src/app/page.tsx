@@ -7,7 +7,7 @@ import { StorySplit } from "@/components/patterns/story-split";
 import { TestimonialCarousel } from "@/components/patterns/testimonial-carousel";
 import { VideoBand } from "@/components/patterns/video-band";
 import { ButtonLink } from "@/components/primitives";
-import { HomeCombinations, HomeScentRow } from "@/components/sections/home";
+import { HomeScentRow } from "@/components/sections/home";
 import {
   HERO_SLIDES,
   HOME_COPY,
@@ -22,7 +22,6 @@ export default function HomePage() {
     <>
       <HeroSlideshow slides={HERO_SLIDES} />
       <HomeScentRow />
-      <HomeCombinations />
       <Marquee items={MARQUEE_ITEMS} />
 
       <VideoBand
@@ -45,6 +44,7 @@ export default function HomePage() {
         eyebrow={HOME_COPY.aboutEyebrow}
         heading={HOME_COPY.aboutHeading}
         body={HOME_COPY.aboutBody}
+        coda={HOME_COPY.aboutCoda}
         cta={HOME_COPY.aboutCta}
         href="/about"
         ctaStyle="link"

@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { existsSync } from "node:fs";
 import { SCENTS, SCENT_NAMES, slideGradient } from "@/content/scents";
-import { COMBINATIONS, HERO_SLIDES, TESTIMONIALS, VALUE_PROPS } from "@/content/home";
+import { HERO_SLIDES, HOME_COPY, TESTIMONIALS, VALUE_PROPS } from "@/content/home";
 import { EVENT_TYPES, EXPERIENCE_STEPS, INCLUDED, REELS } from "@/content/pages";
+import { SITE } from "@/content/site";
 import { IMAGES, VIDEOS } from "@/content/media-manifest";
 
 describe("scent library", () => {
@@ -82,7 +83,6 @@ describe("media manifest", () => {
 describe("page content", () => {
   it("carries the counts the artboards show", () => {
     expect(HERO_SLIDES).toHaveLength(2);
-    expect(COMBINATIONS).toHaveLength(4);
     expect(VALUE_PROPS).toHaveLength(3);
     expect(TESTIMONIALS).toHaveLength(3);
     expect(EVENT_TYPES).toHaveLength(4);
@@ -91,16 +91,21 @@ describe("page content", () => {
     expect(REELS).toHaveLength(4);
   });
 
-  it("numbers the combinations 1 to 4", () => {
-    expect(COMBINATIONS.map((c) => c.no)).toEqual([1, 2, 3, 4]);
+  it("tells the home story in the owner's words", () => {
+    expect(HOME_COPY.aboutHeading).toBe("Created for unforgettable celebrations.");
+    expect(HOME_COPY.aboutBody).toHaveLength(2);
+    expect(HOME_COPY.aboutCoda).toBe("Not just a fragrance. A memory, bottled.");
   });
 
-  it("names only real scents in every combination", () => {
-    for (const combination of COMBINATIONS) {
-      for (const name of combination.notes.split(" · ")) {
-        expect(SCENT_NAMES, `"${combination.name}" names unknown "${name}"`).toContain(name);
-      }
-    }
+  it("shows the bar itself on Private Events, leaving the home strip's photo alone", () => {
+    expect(EVENT_TYPES.find((e) => e.slug === "private-events")?.image).toBe(
+      "brand-bar-dispensers",
+    );
+    expect(HERO_SLIDES[0]?.right).toBe("brand-glasses");
+  });
+
+  it("announces the booking year", () => {
+    expect(SITE.announcement.notice).toBe("Now booking dates for 2027");
   });
 
   it("sends both hero slides somewhere real", () => {
