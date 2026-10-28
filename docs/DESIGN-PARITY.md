@@ -161,6 +161,21 @@ they are content, and live in `src/content/scents.ts`.
 
 ---
 
+## Changed at the owner's request
+
+Not deviations for a technical reason — content the owner revised after launch,
+recorded so the artboards are not mistaken for the current spec.
+
+| Artboard                                                     | Now                                                                                                            | When       |
+| ------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------- | ---------- |
+| Announcement: "Now booking fall and winter 2026 dates"       | "Now booking dates for 2027"                                                                                   | 2026-10-27 |
+| Home: "Tried & Treasured — Popular combinations", four cards | Removed. The scent row now leads straight into the marquee                                                     | 2026-10-27 |
+| Home: "We are Heirloom." and one justified paragraph         | "Created for unforgettable celebrations.", two paragraphs and an italic closing line; label and link unchanged | 2026-10-27 |
+| Events: the second film                                      | The studio's own October 2026 event reel                                                                       | 2026-10-27 |
+| Events: Private Events photographed with `brand-glasses`     | `brand-bar-dispensers` — the bar itself. `brand-glasses` stays in the home filmstrip                           | 2026-10-27 |
+
+---
+
 ## Not carried over
 
 Of the 32 files in the project's `assets/`, **27 are referenced** by an artboard

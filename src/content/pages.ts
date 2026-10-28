@@ -100,8 +100,8 @@ export const EVENT_TYPES: readonly EventType[] = [
     slug: "private-events",
     name: "Private Events",
     body: "Birthdays, anniversaries, dinner parties. For intimate gatherings the experience slows down, longer at the bar, deeper into the library, a blend for every chapter of the story.",
-    image: "brand-glasses",
-    imageAlt: "A private event setup",
+    image: "brand-bar-dispensers",
+    imageAlt: "The Heirloom bar: six scent dispensers above a tray of bottles",
   },
   {
     slug: "brand-experiences",

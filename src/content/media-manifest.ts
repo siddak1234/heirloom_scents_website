@@ -13,6 +13,11 @@ export interface VideoAsset extends ImageAsset {
 }
 
 export const IMAGES = {
+  "brand-bar-dispensers": {
+    src: "/images/brand/brand-bar-dispensers.jpg",
+    width: 967,
+    height: 1209,
+  },
   "brand-bottles": { src: "/images/brand/brand-bottles.jpg", width: 1080, height: 1440 },
   "brand-cart": { src: "/images/brand/brand-cart.jpg", width: 1065, height: 1477 },
   "brand-glasses": { src: "/images/brand/brand-glasses.jpg", width: 1080, height: 1440 },

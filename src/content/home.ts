@@ -36,41 +36,6 @@ export const HERO_SLIDES: readonly HeroSlide[] = [
   },
 ];
 
-export interface Combination {
-  readonly no: number;
-  readonly name: string;
-  readonly notes: string;
-  readonly blurb: string;
-}
-
-/** "Popular combinations" — the 2×2 card grid. */
-export const COMBINATIONS: readonly Combination[] = [
-  {
-    no: 1,
-    name: "The First Dance",
-    notes: "Ivory Petals · Citrus Rose · Golden Vanilla",
-    blurb: "Our most requested wedding blend, white petals over candlelit vanilla.",
-  },
-  {
-    no: 2,
-    name: "Velvet Hour",
-    notes: "Saffron Amber · Midnight Vanilla · Velvet Coffee",
-    blurb: "Candlelight, late toasts, the last songs of the night.",
-  },
-  {
-    no: 3,
-    name: "Garden Party",
-    notes: "Citrus Rose · Berry Cloud · Ivory Petals",
-    blurb: "Bright and effortless, a daytime celebration in a bottle.",
-  },
-  {
-    no: 4,
-    name: "Something Kept",
-    notes: "Velvet Lychee Rose · Saffron Amber · Golden Vanilla",
-    blurb: "Lush lychee and rose, kept warm in golden amber.",
-  },
-];
-
 export interface Testimonial {
   readonly quote: string;
   readonly attribution: string;
@@ -91,7 +56,7 @@ export const TESTIMONIALS: readonly Testimonial[] = [
   },
 ];
 
-/** The scrolling band between the combinations and the video. */
+/** The scrolling band between the scent row and the video. */
 export const MARQUEE_ITEMS: readonly string[] = [
   "Book Your Event",
   "Custom Favors",
@@ -130,9 +95,12 @@ export const HOME_COPY = {
   videoBlurb: "Custom labeled fragrance gifts, made just for them.",
   videoCta: "See It In Motion",
   aboutEyebrow: "About Us",
-  aboutHeading: "We are Heirloom.",
-  aboutBody:
-    "Heirloom Scents is a private fragrance bar for events. We bring the cart, the glassware and a library of house made scents to your celebration. A perfume specialist guides your guests throughout the event, helping each one customize a fragrance around their own preferences before it leaves bottled, labeled and boxed. Nothing is resold and nothing is off the shelf. Every scent is ours, and every bottle is theirs.",
+  aboutHeading: "Created for unforgettable celebrations.",
+  aboutBody: [
+    "We bring our signature perfume bar directly to your event, where guests are invited to explore a curated collection of our house-made fragrances and create a scent that feels uniquely theirs.",
+    "From selecting their favorite notes to bottling, labeling, and packaging their finished fragrance, every guest leaves with a personalized keepsake made especially for them.",
+  ],
+  aboutCoda: "Not just a fragrance. A memory, bottled.",
   aboutCta: "About Us",
   testimonialLabel: "What our guests say",
 } as const;

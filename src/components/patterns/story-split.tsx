@@ -6,13 +6,18 @@ import { cn } from "@/lib/cn";
 
 /**
  * The two-column story block: a matted photograph beside an eyebrow, a 48px
- * heading, a justified paragraph and one action. Home's "We are Heirloom." and
- * the events page's "Celebrate with scent." are the same block mirrored.
+ * heading, justified body copy and one action. Home's "Created for
+ * unforgettable celebrations." and the events page's "Celebrate with scent."
+ * are the same block mirrored.
+ *
+ * `body` is one paragraph or several. `coda` is an optional closing line set in
+ * the display face, as the site's other standalone lines are.
  */
 export function StorySplit({
   eyebrow,
   heading,
   body,
+  coda,
   cta,
   href,
   ctaStyle,
@@ -23,7 +28,8 @@ export function StorySplit({
 }: {
   readonly eyebrow: string;
   readonly heading: string;
-  readonly body: string;
+  readonly body: string | readonly string[];
+  readonly coda?: string | undefined;
   readonly cta: string;
   readonly href: string;
   /** The artboards use an underlined link on home and an outlined button on events. */
@@ -39,11 +45,28 @@ export function StorySplit({
     </Reveal>
   );
 
+  const paragraphs = typeof body === "string" ? [body] : body;
+
   const copy = (
     <Reveal>
       <Eyebrow>{eyebrow}</Eyebrow>
       <h2 className="mt-4 font-heading text-display-sm leading-[1.08] font-normal">{heading}</h2>
-      <p className="mt-5.5 text-body-md/[1.9] text-ink/78 desk:text-justify">{body}</p>
+      {paragraphs.map((paragraph, i) => (
+        <p
+          key={paragraph}
+          className={cn(
+            i === 0 ? "mt-5.5" : "mt-4",
+            "text-body-md/[1.9] text-ink/78 desk:text-justify",
+          )}
+        >
+          {paragraph}
+        </p>
+      ))}
+      {coda ? (
+        <p className="mt-6 font-heading text-heading-sm leading-[1.35] font-normal text-ink italic">
+          {coda}
+        </p>
+      ) : null}
       {ctaStyle === "link" ? (
         <ArrowLink href={href} className="mt-6.5">
           {cta}
